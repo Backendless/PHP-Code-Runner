@@ -1,8 +1,8 @@
 <?php
 
 //enable the display of errors
-//error_reporting(E_ALL);
-//ini_set('display_errors', true);
+error_reporting(E_ALL);
+ini_set('display_errors', true);
 
 use backendless\core\lib\Autoload;
 use backendless\core\RedisManager;
