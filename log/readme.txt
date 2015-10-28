@@ -1,0 +1,1 @@
+CodeRunner uses the /log directory by default when it write logs.

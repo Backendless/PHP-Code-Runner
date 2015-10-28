@@ -1,0 +1,9 @@
+
+# std rules
+
+/classes/
+/lib/
+/log/
+
+# my local
+/repo/

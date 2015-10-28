@@ -1,0 +1,104 @@
+package com.backendless.coderunner.commons.model;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: Eugene Chipachenko
+ * Date: 4/9/14
+ * Time: 3:15 PM
+ */
+@JsonAutoDetect
+public final class EventHandler
+{
+  private int id;
+  private boolean async;
+  private boolean isTimer;
+  private String target;
+  private String provider;
+
+  public int getId()
+  {
+    return id;
+  }
+
+  public void setId( int id )
+  {
+    this.id = id;
+  }
+
+  public boolean isAsync()
+  {
+    return async;
+  }
+
+  public void setAsync( boolean async )
+  {
+    this.async = async;
+  }
+
+  public boolean isTimer()
+  {
+    return isTimer;
+  }
+
+  public void setTimer( boolean isTimer )
+  {
+    this.isTimer = isTimer;
+  }
+
+  public String getTarget()
+  {
+    return target;
+  }
+
+  public void setTarget( String target )
+  {
+    this.target = target;
+  }
+
+  public String getProvider()
+  {
+    return provider;
+  }
+
+  public void setProvider( String provider )
+  {
+    this.provider = provider;
+  }
+
+  @Override
+  public boolean equals( Object o )
+  {
+    if( this == o )
+    {
+      return true;
+    }
+    if( o == null || getClass() != o.getClass() )
+    {
+      return false;
+    }
+
+    EventHandler handler = (EventHandler) o;
+
+    if( id != handler.id )
+    {
+      return false;
+    }
+    if( target != null ? !target.equals( handler.target ) : handler.target != null )
+    {
+      return false;
+    }
+
+    return true;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    int result = id;
+    result = 31 * result + (target != null ? target.hashCode() : 0);
+    return result;
+  }
+}
+

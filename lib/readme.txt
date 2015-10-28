@@ -1,0 +1,1 @@
+CodeRunner uses the /lib directory by default when it looks for any dependencies referenced by your code.
