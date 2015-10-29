@@ -9,6 +9,7 @@ class Config
 
     public static $APPLICATION_ID;
     public static $SECRET_KEY;
+    public static $REST_KEY;
     public static $APP_VERSION;
 
     public static $CLASS_LOCATION;
@@ -43,6 +44,7 @@ class Config
 
         self::$APPLICATION_ID = ( is_string( $config['application_id']) ) ? trim( $config['application_id'] ) :  $config['application_id'];
         self::$SECRET_KEY = ( is_string( $config['application_secret_key']) ) ? trim( $config['application_secret_key'] ) : $config['application_secret_key'];
+        self::$REST_KEY = ( is_string( $config['application_rest_key']) ) ? trim( $config['application_rest_key'] ) : $config['application_rest_key'];
 
 
         self::$APP_VERSION = ( isset($config['application_version']) ) ?  trim( $config['application_version'] ) : 'v1';

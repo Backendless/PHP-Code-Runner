@@ -8,6 +8,8 @@
                 'publish_code'              =>      '/servercode/publishcode',
     
     
+                "___jsonclass"              =>      "com.backendless.coderunner.commons.protocol.InvocationResult",
+    
                 'definition_source_path'    =>  [ 'core', 'commons', 'definition' ], //     core/commons/definition
 
     

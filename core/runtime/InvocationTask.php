@@ -11,6 +11,7 @@ use backendless\core\runtime\adapter\CustomHandlerAdapter;
 use backendless\core\processor\ResponderProcessor;
 use backendless\core\commons\InvocationResult;
 use backendless\core\util\ClassManager;
+use backendless\exception\BackendlessException;
 use backendless\core\lib\Log;
 use ReflectionClass;
 use ReflectionMethod;
@@ -109,7 +110,13 @@ class InvocationTask extends Runnable
                 
         } catch( Exception $e ) { 
             
-            Log::writeError($e->getMessage());
+            Log::writeError( $e->getMessage() );
+            
+        } catch ( BackendlessException $e ) {
+            
+            Log::writeError( "In Backendless SDK occurred error with message: \"" . $e->getMessage() ."\"" );
+            exit();
+            
         }
     
   }

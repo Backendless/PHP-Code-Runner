@@ -1,6 +1,7 @@
 <?php return array (
   'application_id' => 'E3BD3A54-9A07-6160-FF70-A824A9610800',
   'application_secret_key' => 'F5FC1CDF-272D-E7BF-FF2A-284A6B8EF200',
+  'application_rest_key' => 'EC668983-0E73-5AA5-FF93-6A3F3BCDEB00',
   'application_version' => 'v1',
   'location_classes' => '../classes',
   'system_server_url' => 'https://api.backendless.com',

@@ -1,6 +1,8 @@
 <?php
 namespace backendless\core\commons;
 
+use backendless\core\Config;
+
 class InvocationResult
 {
     private $arguments;
@@ -59,7 +61,7 @@ class InvocationResult
     
     public function getConvertedToArray() {
         
-        $data = ["___jsonclass" => "com.backendless.coderunner.commons.InvocationResult"];
+        $data = ["___jsonclass" => Config::$CORE["___jsonclass"] ];
         $data['arguments'] = $this->encode( json_encode( $this->arguments) );
         $data['exception'] = $this->exeption;
         

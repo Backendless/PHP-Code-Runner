@@ -35,10 +35,8 @@ class CodeRunner
 
     public function start() {
 
-        var_dump("TODO: ADD REST KEY");
-        
         Backendless::setUrl( Config::$SERVER_URL );
-        Backendless::initApp( Config::$APPLICATION_ID, "EC668983-0E73-5AA5-FF93-6A3F3BCDEB00", Config::$APP_VERSION );
+        Backendless::initApp( Config::$APPLICATION_ID, Config::$REST_KEY, Config::$APP_VERSION );
         
         if( GlobalState::$TYPE == 'LOCAL') {
             
