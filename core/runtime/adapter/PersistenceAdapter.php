@@ -47,25 +47,7 @@ class PersistenceAdapter
                 
             }
             
-        } else if( $definition['name'] == 'afterFind' && $rmi->getTarget() == $this->ALL_CONTEXT ) {
-
-            
-            var_dump( '//TODO: implement: PersistenceAdapter adaptBeforeExecuting #1');
-            
-            //      ExecutionResult executionResult = (ExecutionResult) arguments[ arguments.length - 1 ];
-            //      BackendlessCollection backendlessCollection = (BackendlessCollection<>) executionResult.getResult();
-
-            //      ArrayNode jsonArgs = (ArrayNode) mapper.readTree( rmi.getArguments() );
-            //      ObjectNode jsonExecutionResult = (ObjectNode) jsonArgs.get( arguments.length - 1 );
-            //      ObjectNode jsonBackendlessCollection = (ObjectNode) jsonExecutionResult.get( "result" );
-            //      ArrayNode jsonBackendlessCollectionData = (ArrayNode) jsonBackendlessCollection.get( "data" );
-            //
-            //      ArrayType collectionDataArray = (ArrayType) Serializer.fromBytes( jsonBackendlessCollectionData.toString().getBytes(), ISerializer.JSON, true );
-            //      HashMap[] collectionDataMapArray = (HashMap[]) collectionDataArray.adapt( HashMap[].class );
-            //      backendlessCollection.setData( Arrays.asList( collectionDataMapArray ) );
-            
-        }
-
+        } 
         
         $generic_index = $definition['generic_index']; // int 1
 
