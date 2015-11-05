@@ -2,7 +2,7 @@
 namespace backendless\core\extension;
 
 
-abstract class UserExtender
+abstract class BaseUserEventHandler
 {
     
     public  function __construct() {

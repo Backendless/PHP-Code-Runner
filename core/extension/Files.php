@@ -1,7 +1,7 @@
 <?php
 namespace backendless\core\extension;
 
-abstract class FilesExtender
+abstract class Files
 {
     public function __construct() {
         

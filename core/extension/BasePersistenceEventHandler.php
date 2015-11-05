@@ -2,7 +2,7 @@
 namespace backendless\core\extension;
 
 
-abstract class PersistenceExtender
+abstract class BasePersistenceEventHandler
 {
     
     public function __construct(){
