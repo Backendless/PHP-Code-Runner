@@ -2,7 +2,7 @@
 namespace backendless\core\extension;
 
 
-abstract class MediaExtender
+abstract class Media
 {
     
     public  function __construct() {

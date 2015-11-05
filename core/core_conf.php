@@ -14,14 +14,14 @@
 
     
                 'provider'  => [
-                                    'DATA'      =>  [ 'path' => 'backendless\core\extention\PersistenceExtender','asset' => true ],
-                                    'FILE'      =>  [ 'path' => 'backendless\core\extention\FilesExtender', 'asset' => true ],
-                                    'GEO'       =>  [ 'path' => 'backendless\core\extention\GeoExtender', 'asset' => true ],
-                                    'MEDIA'     =>  [ 'path' => 'backendless\core\extention\MediaExtender', 'asset' => false ],
-                                    'MESSAGING' =>  [ 'path' => 'backendless\core\extention\MessagingExtender', 'asset' => true ],
-                                    'TIMER'     =>  [ 'path' => 'backendless\core\extention\TimerExtender', 'asset' => false ],
-                                    'USER'      =>  [ 'path' => 'backendless\core\extention\UserExtender', 'asset' => false ],
-                                    'CUSTOM'    =>  [ 'path' => 'backendless\core\extention\CustomExtender', 'asset' => false ]
+                                    'DATA'      =>  [ 'path' => 'backendless\core\extention\BasePersistenceEventHandler','asset' => true ],
+                                    'FILE'      =>  [ 'path' => 'backendless\core\extention\Files', 'asset' => true ],
+                                    'GEO'       =>  [ 'path' => 'backendless\core\extention\Geo', 'asset' => true ],
+                                    'MEDIA'     =>  [ 'path' => 'backendless\core\extention\Media', 'asset' => false ],
+                                    'MESSAGING' =>  [ 'path' => 'backendless\core\extention\Messaging', 'asset' => true ],
+                                    'TIMER'     =>  [ 'path' => 'backendless\core\extention\BaseTimer', 'asset' => false ],
+                                    'USER'      =>  [ 'path' => 'backendless\core\extention\BaseUserEventHandler', 'asset' => false ],
+                                    'CUSTOM'    =>  [ 'path' => 'backendless\core\extention\Custom', 'asset' => false ]
                     
                                ],
     

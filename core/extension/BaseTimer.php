@@ -2,7 +2,7 @@
 namespace backendless\core\extension;
 
 
-abstract class TimerExtender
+abstract class BaseTimer
 {
     
     public  function __construct() {

@@ -2,7 +2,7 @@
 namespace backendless\core\extension;
 
 
-abstract class MessagingExtender
+abstract class Geo
 {
     
     public  function __construct() {
