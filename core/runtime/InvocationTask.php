@@ -75,18 +75,24 @@ class InvocationTask extends Runnable
                     
                 }
                 
-                
                 $instance_class_name = $this->event_handler->getProvider();
                 
-                //ClassManager::IncludeIfStillNot( $instance_class_name );
-                
                 $method = self::findMethod( $instance_class_name, $definition, count( $arguments ) );
+                
+                // bootstrap onEnter action
+                $backendless_globals = ClassManager::getClassInstanceByName("BackendlessGlobals");
+                $backendless_globals->onEnter( $instance_class_name, $method, $arguments );
+                // end bootstrap onEnter action
                 
                 $reflection_method = new ReflectionMethod($instance_class_name, $method);
                 
                 $result = $arguments; // invokeArgs pass $arguments as link and we get changed data after invoke
                 
                 $reflection_method->invokeArgs( new $instance_class_name(), $result );
+                
+                // bootstrap onExit action
+                $backendless_globals->onExit( $instance_class_name, $method, $resalt );
+                // end bootstrap onExit action
                 
                 if( $this->rmi->isAsync() ) {
                     

@@ -11,7 +11,6 @@ use backendless\core\processor\ResponderProcessor;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use backendless\core\lib\Log;
-use backendless\Backendless;
 use Exception;
 use ZipArchive;
 
@@ -34,9 +33,6 @@ class CodeRunner
     }
 
     public function start() {
-
-        Backendless::setUrl( Config::$SERVER_URL );
-        Backendless::initApp( Config::$APPLICATION_ID, Config::$REST_KEY, Config::$APP_VERSION );
         
         if( GlobalState::$TYPE == 'LOCAL') {
             
