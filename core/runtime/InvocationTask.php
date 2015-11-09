@@ -13,6 +13,7 @@ use backendless\core\commons\InvocationResult;
 use backendless\core\util\ClassManager;
 use backendless\exception\BackendlessException;
 use backendless\core\lib\Log;
+use backendless\Backendless;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -80,9 +81,12 @@ class InvocationTask extends Runnable
                 $method = self::findMethod( $instance_class_name, $definition, count( $arguments ) );
                 
                 // bootstrap onEnter action
-                $backendless_globals = ClassManager::getClassInstanceByName("BackendlessGlobals");
+                $backendless_globals = ClassManager::getClassInstanceByName("Bootstrap");
                 $backendless_globals->onEnter( $instance_class_name, $method, $arguments );
                 // end bootstrap onEnter action
+                
+                // switch sdk from rest mode to bl 
+                Backendless::switchOnBlMode();
                 
                 $reflection_method = new ReflectionMethod($instance_class_name, $method);
                 
