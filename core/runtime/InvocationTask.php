@@ -81,7 +81,7 @@ class InvocationTask extends Runnable
                 $method = self::findMethod( $instance_class_name, $definition, count( $arguments ) );
                 
                 // bootstrap onEnter action
-                $backendless_globals = ClassManager::getClassInstanceByName("Bootstrap");
+                $backendless_globals = ClassManager::getClassInstanceByName("BackendlessGlobals");
                 $backendless_globals->onEnter( $instance_class_name, $method, $arguments );
                 // end bootstrap onEnter action
                 
