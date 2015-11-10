@@ -2,7 +2,7 @@
 namespace backendless\core\extension;
 
 
-abstract class Messaging
+abstract class BaseMessagingEventHandler
 {
     
     public  function __construct() {
