@@ -95,7 +95,7 @@ class InvocationTask extends Runnable
                 $reflection_method->invokeArgs( new $instance_class_name(), $result );
                 
                 // bootstrap onExit action
-                $backendless_globals->onExit( $instance_class_name, $method, $resalt );
+                $backendless_globals->onExit( $instance_class_name, $method, $result );
                 // end bootstrap onExit action
                 
                 if( $this->rmi->isAsync() ) {
