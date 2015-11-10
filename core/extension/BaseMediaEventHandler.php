@@ -2,7 +2,7 @@
 namespace backendless\core\extension;
 
 
-abstract class Media
+abstract class BaseMediaEventHandler
 {
     
     public  function __construct() {

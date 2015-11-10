@@ -1,7 +1,7 @@
 <?php
 namespace backendless\core\extension;
 
-abstract class Files
+abstract class BaseFilesEventHandler
 {
     public function __construct() {
         

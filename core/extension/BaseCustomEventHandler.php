@@ -2,7 +2,7 @@
 namespace backendless\core\extension;
 
 
-abstract class CustomEventHandler
+abstract class BaseCustomEventHandler
 {
     
   public function handleEvent( $context, $event_args ) {

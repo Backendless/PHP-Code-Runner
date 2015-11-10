@@ -2,7 +2,7 @@
 namespace backendless\core\extension;
 
 
-abstract class Geo
+abstract class BaseGeoEventHandler
 {
     
     public  function __construct() {
