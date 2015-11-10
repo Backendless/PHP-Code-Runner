@@ -119,7 +119,13 @@ class HttpRequest
                 
                 $json_array = json_decode( $this->getResponce(), true );
                 
-                $msg = "Code: " . $json_array["code"] . " Message: " . $json_array['message'];
+                if( isset( $json_array["code"] ) ) {
+                
+                    $msg = "Code: " . $json_array["code"] . " ";
+                    
+                }
+                
+                $msg = "Message: " . $json_array['message'];
                 
             } else {
                 
