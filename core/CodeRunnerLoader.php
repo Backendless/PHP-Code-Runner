@@ -16,6 +16,8 @@ class  CodeRunnerLoader
     public static function load( $argc, $argv ) {
         
         Config::loadConfig();
+
+        self::phpEnviromentInit();
         
         Log::init();
         
@@ -201,5 +203,24 @@ class  CodeRunnerLoader
         
         Config::saveKeys();
 
+    }
+      
+    protected static function  phpEnviromentInit() {
+          
+        //set default timezone need for WIN and OS X
+        date_default_timezone_set('America/New_York');
+        
+        // check if available openssl for use https
+        if( ! extension_loaded("openssl") ) {
+            
+            Log::writeWarn('PHP module "openssl" not installed or not switch on in php.ini file', $target='file');
+            
+            Config::setServerUrl( preg_replace('/^http:\/\/|https:\/\/(.*)$/', 'http://${1}', Config::$SERVER_URL ) );
+            
+            Log::writeWarn('All https requests to ' . Config::$SERVER_URL . 'changed on http requests', $target='file');
+            
+        }
+         
+          
       }
 }

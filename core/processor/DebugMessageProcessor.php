@@ -31,9 +31,7 @@ class DebugMessageProcessor extends MessageProcessor
 
             }elseif( $result[1] == Config::$CORE['local_shutdown_code'] ) {
 
-                // stop background script for updating in redis expire of debugId
-                posix_kill( Config::$DEBUG_PID, 9 );
-                exit(0);
+                exit( 0 );
 
             }
 

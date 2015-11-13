@@ -26,9 +26,13 @@ class CodeRunner
         //registered method called when app shutdown
         register_shutdown_function( array($this, 'shutdown') );
         
-        //register events when catch app termination and run shutdown method 
-        pcntl_signal(SIGINT, array(&$this, 'terminateRunner'));     // CTRL+C
-        pcntl_signal(SIGQUIT, array(&$this, 'terminateRunner'));    // CTRL+\(Y)
+        if( Config::$CORE['os_type'] != "WIN") { // PCNTL extension not supported on Windows
+
+            //register events when catch app termination and run shutdown method 
+            pcntl_signal(SIGINT, array(&$this, 'terminateRunner'));     // CTRL+C
+            pcntl_signal(SIGQUIT, array(&$this, 'terminateRunner'));    // CTRL+\(Y)
+            
+        }
         
     }
 
@@ -41,11 +45,33 @@ class CodeRunner
             
             $this->tryStopDebugIdUpdater();
             
-            //$predis = RedisManager::getInstance()->getRedis();
-            //$predis->set( "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" ,"51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" );
+            $predis = RedisManager::getInstance()->getRedis();
+            $predis->set( "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" ,"51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" );
+            $predis->expire( "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA", 25 );
+            
+      
+            $cmd = 'php ..' . DS . 'core' . DS . 'DebugIdUpdater.php ' . Config::$DEBUG_ID; 
             
             // start background script for updating in redis expire of debugId
-            Config::$DEBUG_PID = exec("php ../core/DebugIdUpdater.php " . Config::$DEBUG_ID . " > /dev/null 2>&1 & echo $!");
+            if( Config::$CORE['os_type'] != "WIN") {
+                
+               Config::$DEBUG_PID = exec( $cmd . ' > /dev/null 2>&1 & echo $!' );
+                
+            } else {
+                
+                $descriptorspec = [  
+                                    0 => [ "pipe", "r" ],  
+                                    1 => [ "pipe", "w" ],  
+                                  ];
+                $pipes ='';
+                $proc = proc_open( "start /B " . $cmd, $descriptorspec, $pipes );
+                $info = proc_get_status( $proc );
+                
+                Config::$DEBUG_PID =  $info['pid'];
+                //proc_close( $proc );
+                
+            }
+
             
             // put pid into file for try kill DebugIdUpdater.php it before next run CodeRunner
             file_put_contents(".run", Config::$DEBUG_PID);
@@ -131,7 +157,7 @@ class CodeRunner
             CodeRunnerUtil::getInstance()->registerCodeRunner();
             GlobalState::$STATE = 'REGISTERED';
             Log::writeInfo("Runner successfully registered.");
-            
+        
         }
         catch( Exception $e ) {
           
@@ -332,21 +358,21 @@ class CodeRunner
     
     private function rrmdir( $dir ) { 
         
-        if ( is_dir($dir) ) { 
+        if ( is_dir( $dir ) ) { 
             
-          $objects = scandir($dir); 
+          $objects = scandir( $dir ); 
           
-          foreach ($objects as $object) { 
+          foreach ( $objects as $object ) { 
               
             if ($object != "." && $object != "..") { 
                 
-              if (filetype($dir."/".$object) == "dir") { 
+              if ( filetype($dir . DS . $object) == "dir" ) { 
                   
-                $this->rrmdir($dir."/".$object); 
+                $this->rrmdir( $dir . DS . $object ); 
                 
               }else{
                   
-                unlink($dir."/".$object); 
+                unlink( $dir . DS . $object ); 
                                   
               }
               
@@ -364,7 +390,7 @@ class CodeRunner
         
         if ( GlobalState::$TYPE == 'LOCAL' ) {
         
-            exec("php ../core/Stop.php  &  echo $!" );
+            exec( 'php ..' . DS . 'core' . DS . 'Stop.php' );
             
         }
         
@@ -377,9 +403,14 @@ class CodeRunner
             
            $pid = file_get_contents(".run");
            
-           if( $pid != "" ) {
+            if( $pid != "" ) {
                
-                posix_kill( (int)$pid, 9 );
+                if( Config::$CORE['os_type'] != "WIN") {               
+                    
+                        //exec("kill -9 $pid");
+                    posix_kill( (int)$pid, 9 );
+                    
+                } //else {    exec("taskkill /F /PID $pid"); }
                 
                 $predis = RedisManager::getInstance()->getRedis();
                 $predis->expire( Config::$DEBUG_ID, 0 );

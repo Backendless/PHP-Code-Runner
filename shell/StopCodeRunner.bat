@@ -16,8 +16,7 @@ if EXIST %CD%\.run (
 
 )
 
-echo Press any key
-
+echo Press any key to close window.
 pause > nul
 
 

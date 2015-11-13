@@ -22,7 +22,7 @@ include 'lib' . DS . 'Autoload.php';
 include 'lib' . DS . 'predis' . DS . 'autoload.php';
 
 //include file with backendless SDK autoloader 
-include '../lib' . DS . 'backendless' . DS . 'autoload.php';
+include '..' . DS . 'lib' . DS . 'backendless' . DS . 'autoload.php';
 
 // initialize app autoloading
 Autoload::register();

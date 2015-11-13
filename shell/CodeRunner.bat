@@ -14,6 +14,5 @@ if NOT EXIST %CD%\.run (
 php ../core/Run.php %*
 
 
-echo Press any key.
-
+::echo Press any key.
 pause > nul

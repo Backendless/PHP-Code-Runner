@@ -46,7 +46,8 @@ class Config
 
         self::$APP_VERSION = ( isset($config['application_version']) ) ?  trim( $config['application_version'] ) : 'v1';
 
-        self::$CLASS_LOCATION = ( isset($config['location_classes']) ) ?  trim( $config['location_classes'] ) : '..' . DS .'classes' . DS ;
+        self::$CLASS_LOCATION = ( isset($config['location_classes']) ) ?  trim( $config['location_classes'] ) : '..' . DS .'classes';
+        self::$CLASS_LOCATION = str_replace( '/', DS, self::$CLASS_LOCATION );
 
         self::$SERVER_URL = ( isset($config['system_server_url']) ) ?  trim( $config['system_server_url'] ) : 'api.backendless.com';
         self::$REDIS_HOST = ( isset($config['system_redis_host']) ) ?  trim( $config['system_redis_host'] ) : 'cl.backendless.com';      
@@ -54,7 +55,8 @@ class Config
 
         self::$EXECUTOR_CORE_POOL_SIZE = ( isset($config['system_pool_core']) ) ?  trim( $config['system_pool_core'] ) : '20';
 
-        self::$REPO_PATH = ( isset($config['system_repo_path']) ) ?  trim( $config['system_repo_path'] ) : '.' . DS . '../repo/' . DS;
+        self::$REPO_PATH = ( isset($config['system_repo_path']) ) ?  trim( $config['system_repo_path'] ) : '..' . DS . 'repo' . DS;
+        self::$REPO_PATH = str_replace( '/', DS, self::$REPO_PATH );
 
         self::$FULL_REPO_PATH = " not set in class Config.php"; 
 
@@ -82,6 +84,7 @@ class Config
         }
 
         self::loadCoreConfig();
+        self::detectOsType();
 
   }
 
@@ -101,6 +104,26 @@ class Config
         self::$CORE = include BP . DS ."core" . DS . self::$CORE_CONFIG_FILE;
 
     }
+    
+    private static function detectOsType() {
+        
+        if ( strncasecmp(PHP_OS, 'WIN', 3) != 0 ) {
+            
+            self::$CORE['os_type'] = '*nix';
+            
+        }else {
+        
+            self::$CORE['os_type'] = 'WIN';
+            
+        }
+        
+    }
+    
+    public static function setServerUrl( $url ) {
+        
+        self::$SERVER_URL = $url;
+        
+    } 
     
 }
 

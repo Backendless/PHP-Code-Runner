@@ -1,10 +1,13 @@
 <?php
 namespace backendless\core\lib;
 
+use backendless\core\Config;
+
 class Log {
     
     protected static $app_log_file = "application.log";
     protected static $app_log_dir = "log";
+    protected static $is_colored_glob = true;
     
     protected static $log_path;
     
@@ -17,6 +20,12 @@ class Log {
         if( !file_exists( self::$log_path ) ) {
             
             mkdir( self::$log_path );
+            
+        }
+        
+        if( Config::$CORE['os_type'] == "WIN") {
+            
+            self::$is_colored_glob = false;
             
         }
         
@@ -54,7 +63,7 @@ class Log {
     
     protected static function doWrite( $msg, $target, $msg_prefix, $colored, $color ) {
         
-        if( $colored ) {
+        if( $colored && self::$is_colored_glob ) {
             
             $msg_colored_prefix = self::addColor($msg_prefix, $color );
             
