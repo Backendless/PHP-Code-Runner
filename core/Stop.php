@@ -8,6 +8,7 @@ use backendless\core\lib\Autoload;
 use backendless\core\RedisManager;
 use backendless\core\Config;
 use backendless\core\lib\Log;
+use backendless\core\CodeRunnerLoader;
 
 // define short constants
 define('DS', DIRECTORY_SEPARATOR);
@@ -24,6 +25,11 @@ Autoload::register();
 Autoload::addNamespace('backendless\core', BP . DS .'core' );
 
 Config::loadConfig();
+
+CodeRunnerLoader::phpEnviromentInit( );
+
+Log::init( Config::$CORE['os_type'] );
+
 $predis = RedisManager::getInstance()->getRedis();
 
 $predis->rpush( Config::$APPLICATION_ID, Config::$CORE['local_shutdown_code'] );

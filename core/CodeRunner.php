@@ -45,9 +45,10 @@ class CodeRunner
             
             $this->tryStopDebugIdUpdater();
             
-            $predis = RedisManager::getInstance()->getRedis();
-            $predis->set( "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" ,"51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" );
-            $predis->expire( "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA", 25 );
+            // CODE FOR TESTING
+            //$predis = RedisManager::getInstance()->getRedis();
+            //$predis->set( "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" ,"51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" );
+            //$predis->expire( "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA", 25 );
             
       
             $cmd = 'php ..' . DS . 'core' . DS . 'DebugIdUpdater.php ' . Config::$DEBUG_ID; 
@@ -72,7 +73,6 @@ class CodeRunner
                 
             }
 
-            
             // put pid into file for try kill DebugIdUpdater.php it before next run CodeRunner
             file_put_contents(".run", Config::$DEBUG_PID);
                         

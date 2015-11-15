@@ -1,7 +1,6 @@
 <?php
 namespace backendless\core\lib;
 
-use backendless\core\Config;
 
 class Log {
     
@@ -13,7 +12,7 @@ class Log {
     
     protected static $colors = [ 'blue' => '0;34', 'yellow' => '1;33', 'red' => '0;31' ];
     
-    public static function init( ) {
+    public static function init( $os_type = '' ) {
         
         self::$log_path =  BP . DS . self::$app_log_dir ;
         
@@ -23,7 +22,7 @@ class Log {
             
         }
         
-        if( Config::$CORE['os_type'] == "WIN") {
+        if( $os_type == "WIN") {
             
             self::$is_colored_glob = false;
             

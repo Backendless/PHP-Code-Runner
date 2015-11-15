@@ -19,7 +19,7 @@ class  CodeRunnerLoader
 
         self::phpEnviromentInit();
         
-        Log::init();
+        Log::init( Config::$CORE['os_type'] );
         
         Log::writeInfo("Start CodeRunner.", $target = 'file');
         
@@ -205,7 +205,7 @@ class  CodeRunnerLoader
 
     }
       
-    protected static function  phpEnviromentInit() {
+    public static function  phpEnviromentInit() {
           
         //set default timezone need for WIN and OS X
         date_default_timezone_set('America/New_York');
