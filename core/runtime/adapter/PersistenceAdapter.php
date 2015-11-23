@@ -5,6 +5,7 @@ use backendless\core\servercode\RunnerContext;
 use backendless\core\util\ClassManager;
 use ReflectionClass;
 use backendless\core\util\ReflectionUtil;
+use backendless\core\servercode\ExecutionResult;
 
 
 class PersistenceAdapter
@@ -49,6 +50,24 @@ class PersistenceAdapter
             
         } 
         
+        // convert data to ExecutionResult class
+        
+        foreach ( $arguments as $arg_index=>$arg_val) {
+            
+            if( isset( $arg_val["___jsonclass"]) ) {
+                
+                if( $arg_val["___jsonclass"] == "com.backendless.servercode.ExecutionResult") {
+                    
+                    $execution_result = new ExecutionResult();
+                    $execution_result->setException( $arguments[$arg_index]["exception"] );
+                    $execution_result->setResult( $arguments[$arg_index]["result"] );
+                    $arguments[$arg_index] = $execution_result;
+                    
+                }
+            }
+            
+        }
+        
         $generic_index = $definition['generic_index']; // int 1
 
         if( $generic_index == null ) {
@@ -64,15 +83,6 @@ class PersistenceAdapter
         if( $rmi->getTarget()  === self::$ALL_CONTEXT ) {
       
             $arguments[ $generic_index ] = $declared_properties;
-
-        
-            if( strpos( $definition['name'], "after") !== 0 ) {
-                
-              var_dump( '//TODO: implement: PersistenceAdapter adaptBeforeExecuting #2');
-              //ExecutionResult executionResult = (ExecutionResult) arguments[ arguments.length - 1 ]; какой смысл если он не статичский итд
-              //executionResult.setResult( declaredProperties );
-
-            }
       
             return $arguments;
       
