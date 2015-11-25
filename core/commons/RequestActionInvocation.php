@@ -2,8 +2,11 @@
 namespace backendless\core\commons;
 
 use backendless\core\commons\AbstractRequest;
+//use backendless\core\Config;
+//use backendless\core\GlobalState;
+//use backendless\core\util\ClassManager;
 
-class RequestMethodInvocation extends AbstractRequest
+class RequestActionInvocation extends AbstractRequest
 {
     private $event_id;
     private $arguments;
@@ -12,22 +15,26 @@ class RequestMethodInvocation extends AbstractRequest
     private $timeout;
     private $async;
     
-    public function __construct( $msg_array ) {
+    public function __construct( $msg ) {
+
+        var_dump(" RequestActionInvocation created ");
         
         parent::__construct();
+
+                
+        $this->id               =   $msg['id'];
+        $this->application_id   =   $msg['applicationId'];
+        $this->app_version_id   =   $msg['appVersionId'];
         
-        $this->id               =   $msg_array['id'];
-        $this->application_id   =   $msg_array['applicationId'];
-        $this->app_version_id   =   $msg_array['appVersionId'];
         
-        $this->event_id     =   $msg_array['eventId'];
-        $this->arguments    =   $msg_array['arguments'];
-        $this->target       =   $msg_array['target'];
-        $this->timeout      =   $msg_array['timeout'];
-        $this->async        =   $msg_array['async'];
-        $this->relative_path    =   $msg_array['relativePath'];
+        $this->event_id     =   $msg['eventId'];
+        $this->arguments    =   $msg['arguments'];
+        $this->target       =   $msg['target'];
+        $this->timeout      =   $msg['timeout'];
+        $this->async        =   $msg['async'];
         
         $this->decoded_arguments = null;
+        
         
     }
     
@@ -134,3 +141,51 @@ class RequestMethodInvocation extends AbstractRequest
     }
     
 }
+     //JAVA  
+
+/*
+ package com.backendless.coderunner.commons.protocol;
+
+import com.backendless.coderunner.commons.ActionType;
+import com.backendless.coderunner.commons.actionargs.IActionArgs;
+
+public class RequestActionInvocation extends AbstractRequest
+{
+  private ActionType actionType;
+  private IActionArgs argObject;
+
+  public RequestActionInvocation()
+  {
+  }
+
+  public RequestActionInvocation(String id, String appId, String appVersionId, ActionType actionType, IActionArgs argObject, int timeout )
+  {
+    this.setId( id );
+    this.setApplicationId( appId );
+    this.setAppVersionId( appVersionId );
+    this.setActionType( actionType );
+    this.setArgObject( argObject );
+    this.setTimeout( timeout );
+  }
+
+  public ActionType getActionType()
+  {
+    return actionType;
+  }
+
+  public void setActionType( ActionType actionType )
+  {
+    this.actionType = actionType;
+  }
+
+  public IActionArgs getArgObject()
+  {
+    return argObject;
+  }
+
+  public void setArgObject( IActionArgs argObject )
+  {
+    this.argObject = argObject;
+  }
+}
+*/

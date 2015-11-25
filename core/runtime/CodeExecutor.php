@@ -5,7 +5,9 @@ use backendless\core\lib\Log;
 use backendless\core\parser\EventModelParser;
 use backendless\core\Config;
 use backendless\core\GlobalState;
-use backendless\core\runtime\InvocationTask;
+use backendless\core\util\ClassManager;
+use backendless\core\runtime\task\InvocationTask;
+use backendless\core\runtime\task\HostedServiceParseTask;    
 
 
 class CodeExecutor
@@ -22,7 +24,7 @@ class CodeExecutor
         
     }
 
-    public function invoke( $rmi ) { 
+    public function invokeMethod( $rmi ) { 
        
         if( $rmi->getEventId() == Config::$CORE['shutdown_code'] && GlobalState::$TYPE == 'LOCAL' ) {
 
@@ -37,6 +39,15 @@ class CodeExecutor
             return;
             
         }
+        
+        if ( GlobalState::$TYPE === 'CLOUD') {
+        
+            Config::$RELATIVE_PATH  =   $msg['relativePath'];
+            Config::$TASK_APPLICATION_ID = $msg['applicationId'];
+            
+            ClassManager::analyze();
+            
+        }
 
         $event_handler = $this->event_handlers_model->getEventHandler( $rmi->getEventid(), $rmi->getTarget() );
 
@@ -45,12 +56,32 @@ class CodeExecutor
         $invocation_task->runImpl();
        
     }
+    
+    public function invokeAction( $rai ) {
+        
+        $invocation_task = new HostedServiceParseTask( $rai );
+        $invocation_task->runImpl();
+        
+        
+//    // TODO: make switch
+//    switch( rai.getActionType() )
+//    {
+//      case PARSE_CUSTOM_SERVICE_FROM_JAR:
+//      {
+//        CustomServiceParserTask task = new CustomServiceParserTask( classLoader, rai );
+//        task.setTimeout( rai.getTimeout() );
+//        Executors.execute( task );
+//        break;
+//      }
+//      default:
+//    }
+  }
 
     public function init() {
 
-        if($this->event_handlers_model == null ) {
+        if( $this->event_handlers_model == null ) {
             
-          $this->initEventModel();
+            $this->initEventModel();
           
         }
         

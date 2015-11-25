@@ -1,14 +1,12 @@
 <?php
 namespace backendless\core\runtime\concurrent;
 
-use backendless\core\lib\Log;
-
-
 abstract class Runnable
 {
     protected $application_id;
     protected $timeout;
 
+    public function __construct() { }
 
     public abstract function runImpl();
 

@@ -3,23 +3,18 @@ namespace backendless\core\holder;
 
 use backendless\core\GlobalState;
 use backendless\core\runtime\CodeExecutor;
-use backendless\core\Config;
 use backendless\core\holder\CodeExecutorFactory;
 
 
 class CodeExecutorHolder
 {
     private static $instance;
-    
-    private $cache_manager;             
-    private $code_executor_factory;
-    
+
     private $debug_executor = null;     
 
     private function __construct() {
         
         $this->code_executor_factory = new CodeExecutorFactory();
-        $this->cache_manager = [];
         
     }
 
@@ -33,30 +28,28 @@ class CodeExecutorHolder
         
     }
     
-    public function getCodeExecutor( $application_id, $app_version_id ) {
+    public function getCodeExecutor( $application_id, $app_version_id, $call_init = false ) {
         
         if( GlobalState::$TYPE == "LOCAL" ) {
 
             if( $this->debug_executor == null ) {
                 
-                $this->debug_executor = new CodeExecutor( Config::$APPLICATION_ID , Config::$APP_VERSION );
+                $this->debug_executor = new CodeExecutor( $application_id , $app_version_id );
                 
             }
 
-            return $this->debug_executor;
+            return $this->debug_executor; // $this->debug_executor need one instance for  possibility set event model in EventModelParser  class
 
         }
-
-        if( isset( $this->cache_manager[$app_version_id] ) ) {
+        
+        $executor = new CodeExecutor( $application_id , $app_version_id );
+        
+        if( $call_init ) {
             
-          return $this->cache_manager[$app_version_id];
-
+            $executor->init(); //in CLOUD mode red event model from file
+            
         }
-
-        $executor = $this->code_executor_factory->createExecutor($application_id, $app_version_id);
-
-        $this->cache_manager[$app_version_id] = $executor;
-
+        
         return $executor;
        
     }

@@ -57,6 +57,9 @@ class ResponderProcessor
     
     public function cloudRun() {
         
+        var_dump("Invocation result put to driver: DIE()");
+        die();
+        
         $result = array_shift( self::$results_queue );
             
             if( $result === null ) {
