@@ -3,21 +3,12 @@ namespace backendless\core\runtime\task;
 
 use backendless\core\runtime\concurrent\Runnable;
 use backendless\core\parser\HostedServiceParser;
-//use backendless\core\commons\holder\EventDefinitionHolder;
-//use backendless\core\runtime\adapter\ArgumentAdapterList;
-//use backendless\core\runtime\adapter\PersistenceAdapter;
-//use backendless\core\runtime\adapter\UserAdapter;
-//use backendless\core\runtime\adapter\MessagingAdapter;
-//use backendless\core\runtime\adapter\CustomHandlerAdapter;
 use backendless\core\processor\ResponderProcessor;
 use backendless\core\commons\InvocationResult;
-//use backendless\core\util\ClassManager;
-//use backendless\exception\BackendlessException;
+use backendless\core\util\XmlManager;
+use backendless\core\Config;
 use backendless\core\lib\Log;
-//use backendless\Backendless;
-//use ReflectionClass;
-//use ReflectionMethod;
-
+use Exception;
 
 
 class HostedServiceParseTask extends Runnable
@@ -43,7 +34,7 @@ class HostedServiceParseTask extends Runnable
             
         }
 
-        $invocation_result = new InvocationResult();
+       // $invocation_result = new InvocationResult();
         
         try{       
             
@@ -53,11 +44,30 @@ class HostedServiceParseTask extends Runnable
             
             $hosted_parser->parseFolderWithCustomCode(); 
             
+            if( $hosted_parser->isError() ) {
+                
+                return ResponderProcessor::sendResult( $this->rai->getId(), $hosted_parser->getErrorAsJson() ); 
+                
+            }
             
-            var_dump($hosted_parser->getErrorAsJson());
-            ResponderProcessor::sendResult( $this->rai->getId(), "ok" );
             
-            //java // ResponderProcessor.sendResult( rsi.getId(), new Object[]{o} );
+            $runtime = [
+                        
+                        'path'  =>  "TODO",
+                        'endpointURL' => Config::$CORE['hosted_service']['endpoint_url'],
+                        'serverRootURL' => Config::$CORE['hosted_service']['server_root_url'],
+                        'serverPort'    =>  Config::$CORE['hosted_service']['server_port'],
+                        'serverName'    =>  Config::$CORE['hosted_service']['server_name'],
+                        'codeFormatType'    =>  Config::$CORE['hosted_service']['code_format_type'], 
+                        "generationMode"    =>  Config::$CORE['hosted_service']['generation_mode'], 
+                        'randomUUID'    =>  "TODO",
+                
+            ];
+            
+            $xml_manager = new XmlManager();
+
+            ResponderProcessor::sendResult( $this->rai->getId(), $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime ) );
+
                 
         } catch( Exception $e ) { 
             

@@ -57,9 +57,6 @@ class ResponderProcessor
     
     public function cloudRun() {
         
-        var_dump("Invocation result put to driver: DIE()");
-        die();
-        
         $result = array_shift( self::$results_queue );
             
             if( $result === null ) {
@@ -73,8 +70,17 @@ class ResponderProcessor
                                                        . 'coderunnerId=' . Config::$CORE['processing_coderunnerId'] . ''
                                                        . '&requestId=' . Config::$CORE['processing_requestId'] . ''
                                                        . '&lang=PHP';
+        $result_data = '';
         
-        $result_data = json_encode( $result['result']->getConvertedToArray() );
+        if( is_object( $result['result'] ) ) {
+            
+            $result_data = json_encode( $result['result']->getConvertedToArray() );
+            
+        } else {
+            
+            $result_data = $result['result'];
+            
+        }
         
         $http_request->setTargetUrl( $target )
                      ->setHeader('Content-type', 'application/json')

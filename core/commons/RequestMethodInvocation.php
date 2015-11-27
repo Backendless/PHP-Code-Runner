@@ -12,31 +12,24 @@ class RequestMethodInvocation extends AbstractRequest
     private $timeout;
     private $async;
     
-    public function __construct( $msg_array ) {
+    public function __construct( $msg ) {
         
         parent::__construct();
-        
-        $this->id               =   $msg_array['id'];
-        $this->application_id   =   $msg_array['applicationId'];
-        $this->app_version_id   =   $msg_array['appVersionId'];
-        
-        $this->event_id     =   $msg_array['eventId'];
-        $this->arguments    =   $msg_array['arguments'];
-        $this->target       =   $msg_array['target'];
-        $this->timeout      =   $msg_array['timeout'];
-        $this->async        =   $msg_array['async'];
-        $this->relative_path    =   $msg_array['relativePath'];
+
+        $this->setId( $msg['id'] )
+             ->setApplicationId( $msg['applicationId'] )
+             ->setAppVersionId( $msg['appVersionId'] )   
+             ->setEventId( $msg['eventId']  )
+             ->setArguments( $msg['arguments'] )
+             ->setTarget( $msg['target'] )   
+             ->setTimeout( $msg['timeout'] )
+             ->setAsync( $msg['async'] )
+             ->setRelativePath( $msg['relativePath'] );   
         
         $this->decoded_arguments = null;
         
     }
     
-    public function getAppVersionId() {
-        
-        return $this->app_version_id;
-        
-    }
-
     public function getEventId() {
         
         return $this->event_id;
@@ -46,6 +39,7 @@ class RequestMethodInvocation extends AbstractRequest
     public function setEventId( $event_id ) {
         
       $this->event_id = $event_id;
+      return $this;
       
     }
     
@@ -76,10 +70,10 @@ class RequestMethodInvocation extends AbstractRequest
         
     }
     
-
     public function setArguments( $arguments ) {
       
         $this->arguments = $arguments;
+        return $this;
         
     }
     
@@ -92,6 +86,7 @@ class RequestMethodInvocation extends AbstractRequest
     public function setTarget( $target ) {
       
         $this->target = $target;
+        return $this;
         
     }
 
@@ -104,6 +99,7 @@ class RequestMethodInvocation extends AbstractRequest
     public function setTimeout( $timeout ) {
       
         $this->timeout = $timeout;
+        return $this;
         
     }
 
@@ -116,6 +112,7 @@ class RequestMethodInvocation extends AbstractRequest
     public function setAsync( $async ) {
         
       $this->async = $async;
+      return $this;
       
     }
 

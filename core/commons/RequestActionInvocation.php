@@ -2,9 +2,7 @@
 namespace backendless\core\commons;
 
 use backendless\core\commons\AbstractRequest;
-//use backendless\core\Config;
-//use backendless\core\GlobalState;
-//use backendless\core\util\ClassManager;
+
 
 class RequestActionInvocation extends AbstractRequest
 {
@@ -12,35 +10,26 @@ class RequestActionInvocation extends AbstractRequest
     private $arguments;
     private $decoded_arguments;
     private $target;
-    private $timeout;
     private $async;
+    
+    private $action_type;
     
     public function __construct( $msg ) {
 
-        var_dump(" RequestActionInvocation created ");
-        
         parent::__construct();
 
-                
-        $this->id               =   $msg['id'];
-        $this->application_id   =   $msg['applicationId'];
-        $this->app_version_id   =   $msg['appVersionId'];
-        
-        
-        $this->event_id     =   $msg['eventId'];
-        $this->arguments    =   $msg['arguments'];
-        $this->target       =   $msg['target'];
-        $this->timeout      =   $msg['timeout'];
-        $this->async        =   $msg['async'];
+        $this->setId( $msg['id'] )
+             ->setApplicationId( $msg['applicationId'] )
+             ->setAppVersionId( $msg['appVersionId'] )   
+             ->setEventId( $msg['eventId']  )
+             ->setArguments( $msg['arguments'] )
+             ->setTarget( $msg['target'] )   
+             ->setTimeout( $msg['timeout'] )
+             ->setAsync( $msg['async'] )
+             ->setActionType( $msg['actionType'] )
+             ->setRelativePath( $msg['relativePath'] );   
         
         $this->decoded_arguments = null;
-        
-        
-    }
-    
-    public function getAppVersionId() {
-        
-        return $this->app_version_id;
         
     }
 
@@ -53,6 +42,7 @@ class RequestActionInvocation extends AbstractRequest
     public function setEventId( $event_id ) {
         
       $this->event_id = $event_id;
+      return $this;
       
     }
     
@@ -71,22 +61,20 @@ class RequestActionInvocation extends AbstractRequest
             foreach ($this->arguments as $code ) {
 
                 $argumenst_decoded_string .= chr($code); //ASC||
-                //$argumenst_decoded_string .= iconv( 'UCS-4LE', 'UTF-8', pack('V', $code) );
-                //$argumenst_decoded_string .=  pack('V', $code);
-
+                
             }
 
-            $this->decoded_arguments = json_decode($argumenst_decoded_string, true);
+            $this->decoded_arguments = json_decode( $argumenst_decoded_string, true );
         }
         
         return $this->decoded_arguments;
         
     }
     
-
     public function setArguments( $arguments ) {
       
         $this->arguments = $arguments;
+        return $this;
         
     }
     
@@ -99,18 +87,7 @@ class RequestActionInvocation extends AbstractRequest
     public function setTarget( $target ) {
       
         $this->target = $target;
-        
-    }
-
-    public function getTimeout() {
-        
-      return $this->timeout;
-      
-    }
-
-    public function setTimeout( $timeout ) {
-      
-        $this->timeout = $timeout;
+        return $this;
         
     }
 
@@ -123,14 +100,28 @@ class RequestActionInvocation extends AbstractRequest
     public function setAsync( $async ) {
         
       $this->async = $async;
+      return $this;
       
     }
+    
+    public function getActionType() {
+    
+        return $this->action_type;
+        
+    }
+
+    public function setActionType( $action_type ){
+  
+      $this->action_type = $action_type;
+      return $this;
+      
+  }
 
     public function __toString() {
       
       $async = ( $this->async == true ) ? "true" : "false";
         
-      return "RequestMethodInvocation{" .
+      return "RequestActionInvocation{" .
               " appId=" . $this->application_id .
               ", versionId=" . $this->app_version_id .
               ", eventId=" . $this->event_id .
@@ -141,51 +132,3 @@ class RequestActionInvocation extends AbstractRequest
     }
     
 }
-     //JAVA  
-
-/*
- package com.backendless.coderunner.commons.protocol;
-
-import com.backendless.coderunner.commons.ActionType;
-import com.backendless.coderunner.commons.actionargs.IActionArgs;
-
-public class RequestActionInvocation extends AbstractRequest
-{
-  private ActionType actionType;
-  private IActionArgs argObject;
-
-  public RequestActionInvocation()
-  {
-  }
-
-  public RequestActionInvocation(String id, String appId, String appVersionId, ActionType actionType, IActionArgs argObject, int timeout )
-  {
-    this.setId( id );
-    this.setApplicationId( appId );
-    this.setAppVersionId( appVersionId );
-    this.setActionType( actionType );
-    this.setArgObject( argObject );
-    this.setTimeout( timeout );
-  }
-
-  public ActionType getActionType()
-  {
-    return actionType;
-  }
-
-  public void setActionType( ActionType actionType )
-  {
-    this.actionType = actionType;
-  }
-
-  public IActionArgs getArgObject()
-  {
-    return argObject;
-  }
-
-  public void setArgObject( IActionArgs argObject )
-  {
-    this.argObject = argObject;
-  }
-}
-*/

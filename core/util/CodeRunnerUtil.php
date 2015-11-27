@@ -60,9 +60,6 @@ class CodeRunnerUtil
             
             Config::$DEBUG_ID = json_decode($http_request->getResponce(), true)['debugId'];
             
-            // TODO: delete after test
-            //Config::$DEBUG_ID = "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA";
-            
             if( !isset( Config::$DEBUG_ID )  ) {
                 
                 $msg = "CodeRunner can't get  debugid.";
