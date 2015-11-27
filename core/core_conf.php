@@ -1,6 +1,6 @@
 <?php return [
     
-                'lang'                      =>      'java',
+                'lang'                      =>      'PHP',
                 'register_model_link'       =>      '/servercode/registermodel',
                 'register_runner_link'      =>      '/servercode/registerRunner',
                 'unregister_runner_link'    =>      '/servercode/unregisterRunner',
