@@ -32,9 +32,7 @@ class  CodeRunnerLoader
             
             ClassManager::analyze();
             
-            echo "\n";
-            Log::write("CodeRunner(tm) Backendless Debugging Utility", $target = 'console' );
-            Log::write("Copyright(C) " . date("Y", time()) . " Backendless Corp. All rights reserved. \n", $target = 'console');
+            self::printGreeting();
         
         } else {
 
@@ -47,6 +45,16 @@ class  CodeRunnerLoader
         $code_runner->start();
 
     }
+    
+    private static function printGreeting(){
+        
+        echo "\n";
+        Log::write("CodeRunner(tm) Backendless Debugging Utility", $target = 'console' );
+        Log::write("Copyright(C) " . date("Y", time()) . " Backendless Corp. All rights reserved.", $target = 'console');
+        Log::write( "Version: " . Config::$VERSION . " \n", $target = 'console' );
+        
+    }
+
     
     private static function checkInputKeysForCloud( $argc, $argv ) {
         
