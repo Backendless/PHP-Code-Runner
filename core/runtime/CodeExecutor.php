@@ -8,6 +8,7 @@ use backendless\core\GlobalState;
 use backendless\core\util\ClassManager;
 use backendless\core\runtime\task\InvocationTask;
 use backendless\core\runtime\task\HostedServiceParseTask;    
+use backendless\core\runtime\task\HostedServiceInvocationTask;
 
 
 class CodeExecutor
@@ -59,22 +60,24 @@ class CodeExecutor
     
     public function invokeAction( $rai ) {
         
-        $invocation_task = new HostedServiceParseTask( $rai );
-        $invocation_task->runImpl();
+        switch ( $rai->getActionType() ) {
+            
+            case 'PARSE_CUSTOM_SERVICE_FROM_JAR': 
+                                                    $invocation_task = new HostedServiceParseTask( $rai );
+                                                    $invocation_task->runImpl();
+                                                    break;    
+            
+            default : Log::writeError("Can't define action type of received RequestActionInvocation", $target = "all");
+            
+        }
+
+  }
+  
+   public function invokeService( $rsi ) {
         
-        var_dump( "TODO #22" );
-//    // TODO: make switch
-//    switch( rai.getActionType() )
-//    {
-//      case PARSE_CUSTOM_SERVICE_FROM_JAR:
-//      {
-//        CustomServiceParserTask task = new CustomServiceParserTask( classLoader, rai );
-//        task.setTimeout( rai.getTimeout() );
-//        Executors.execute( task );
-//        break;
-//      }
-//      default:
-//    }
+        $invocation_task = new HostedServiceInvocationTask( $rsi );
+        $invocation_task->runImpl();
+
   }
 
     public function init() {

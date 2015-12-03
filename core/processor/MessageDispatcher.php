@@ -4,6 +4,7 @@ namespace backendless\core\processor;
 use backendless\core\holder\CodeExecutorHolder;
 use backendless\core\commons\RequestMethodInvocation;
 use backendless\core\commons\RequestActionInvocation;    
+use backendless\core\commons\RequestServiceInvocation;
 use backendless\core\GlobalState;
 use backendless\core\lib\Log;
 
@@ -23,7 +24,7 @@ class MessageDispatcher
     public function  onMessageReceived( $msg ) {
         
         $msg = json_decode( $msg, true );
-        
+
         if( isset( $msg["___jsonclass"] ) ) {
             
             $class_name_parts = explode( "." , $msg["___jsonclass"] );
@@ -32,6 +33,7 @@ class MessageDispatcher
                 
                 case "RequestMethodInvocation" : $this->RequestMethodInvocation( $msg ); break;
                 case "RequestActionInvocation" : $this->RequestActionInvocation( $msg ); break;
+                case "RequestServiceInvocation" : $this->RequestServiceInvocation( $msg ); break;
                 
                 default : Log::writeError( "MessageDispatcher can`t define class provider of received message "); return;
                 
@@ -79,6 +81,24 @@ class MessageDispatcher
         
         $executor = $this->executor_holder->getCodeExecutor( $rai->getApplicationId(), $rai->getAppVersionId() );
         $executor->invokeAction( $rai );
+        
+    }
+    
+    protected function RequestServiceInvocation( $msg ) {  /// invoke hosted servise action
+        
+        $rsi = new RequestServiceInvocation( $msg );
+        
+        Log::writeInfo( "Received RSI:" . $rsi, $target = 'file');
+        
+        if( GlobalState::$TYPE == 'CLOUD' && ( ( (time()*1000) - $rsi->getTimestamp() ) > $this->timeout ) ) {
+
+            Log::writeError( "RSI ignored by timeout" . $rsi, $target = 'file');
+            return;
+
+        }
+        
+        $executor = $this->executor_holder->getCodeExecutor( $rsi->getApplicationId(), $rsi->getAppVersionId() );
+        $executor->invokeService( $rsi );
         
     }
     

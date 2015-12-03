@@ -166,7 +166,7 @@ class RequestServiceInvocation extends AbstractRequest
     public function setInvocationContext(  $invocation_context ) {
         
         $this->invocation_context = $invocation_context;
-        return $invocation_context;
+        return $this;
       
     }
 

@@ -54,7 +54,7 @@ class XmlManager
 
     public function buildXml( $data_array, $runtime_vars ) {
         
-        $domtree = new DOMDocument('1.0', 'UTF-8');
+        $domtree = new DOMDocument('1.0', 'ISO-8859-1');
          
         $domtree->preserveWhiteSpace = false;
         $domtree->formatOutput = true;

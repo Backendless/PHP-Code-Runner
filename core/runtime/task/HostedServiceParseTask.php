@@ -34,11 +34,7 @@ class HostedServiceParseTask extends Runnable
             
         }
 
-       // $invocation_result = new InvocationResult();
-        
         try{       
-            
-            var_dump("RUN IMPL for parsing");
             
             $hosted_parser = new HostedServiceParser();
             
@@ -65,8 +61,11 @@ class HostedServiceParseTask extends Runnable
             ];
             
             $xml_manager = new XmlManager();
-
-            ResponderProcessor::sendResult( $this->rai->getId(), $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime ) );
+            
+            $invocation_result = new InvocationResult();
+            $invocation_result->setArguments( ["xml" => $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime ) ] );
+            
+            ResponderProcessor::sendResult( $this->rai->getId(), $invocation_result );
 
                 
         } catch( Exception $e ) { 
