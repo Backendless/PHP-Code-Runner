@@ -5,7 +5,8 @@ class Config
 {
     
     private static $RUNNER_PROPERTIES_FILE = "config.php";
-    private static $CORE_CONFIG_FILE = "core_conf.php"; 
+    private static $CORE_CONFIG_FILE = "core_conf.php";
+    private static $VERSION_FILE = "version.php";
 
     public static $APPLICATION_ID;
     public static $SECRET_KEY;
@@ -36,6 +37,8 @@ class Config
     public static $DEBUG_PID;
     
     public static $CORE;
+    
+    public static $VERSION;
 
     public static function loadConfig() {
       
@@ -83,6 +86,8 @@ class Config
 
         }
 
+        self::$VERSION = include BP . DS ."core" . DS . self::$VERSION_FILE;
+        
         self::loadCoreConfig();
         self::detectOsType();
 
