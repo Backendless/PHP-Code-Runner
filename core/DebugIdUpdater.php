@@ -28,7 +28,7 @@ $debug_id = $argv[1];
 
 for( ; ; ){
     
-    $predis->expire( $debug_id, 30 );
-    sleep( 20 );
+    $predis->expire( $debug_id, 60 );
+    sleep( 45 );
     
 }
