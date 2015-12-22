@@ -9,7 +9,6 @@ class RequestMethodInvocation extends AbstractRequest
     private $arguments;
     private $decoded_arguments;
     private $target;
-    private $timeout;
     private $async;
     
     public function __construct( $msg ) {

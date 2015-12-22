@@ -6,6 +6,9 @@ use backendless\core\commons\RequestMethodInvocation;
 use backendless\core\commons\RequestActionInvocation;    
 use backendless\core\commons\RequestServiceInvocation;
 use backendless\core\GlobalState;
+use backendless\core\Config;
+use backendless\core\util\ClassManager;
+use backendless\core\util\PathBuilder;
 use backendless\core\lib\Log;
 
 class MessageDispatcher
@@ -59,6 +62,15 @@ class MessageDispatcher
             Log::writeError( "RMI ignored by timeout" . $rmi, $target = 'file');
             return;
 
+        }
+        
+        if ( GlobalState::$TYPE === 'CLOUD') {
+            
+            Config::$RELATIVE_PATH  =   $msg['relativePath'];
+            Config::$TASK_APPLICATION_ID = $msg['applicationId'];
+            
+            ClassManager::analyze( PathBuilder::getClasses() );
+            
         }
         
         $code_executor = $this->executor_holder->getCodeExecutor( $rmi->getApplicationId(), $rmi->getAppVersionId(), true );

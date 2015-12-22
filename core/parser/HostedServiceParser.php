@@ -8,7 +8,6 @@ use RecursiveDirectoryIterator;
 use backendless\core\lib\Log;
 use RecursiveCallbackFilterIterator;
 use Exception;
-use ReflectionProperty;
 use ReflectionClass;
 use ReflectionMethod;
 use RegexIterator;
@@ -43,7 +42,7 @@ class HostedServiceParser {
         $this->is_exist_interface = false;
         
         $this->used_classes = [];
-        
+
         $this->path = $path;
         $this->rai_id = $rai_id;
         

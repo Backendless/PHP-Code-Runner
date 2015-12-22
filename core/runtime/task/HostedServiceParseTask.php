@@ -39,7 +39,7 @@ class HostedServiceParseTask extends Runnable
             
             $hosted_parser = new HostedServiceParser( 
                                                         PathBuilder::getHostedService( $this->rai->getAppVersionId(), $this->rai->getRelativePath() ), 
-                                                        $this->rai->getId()
+                                                        $this->rai->getId() 
                                                     );
             
             $hosted_parser->parseFolderWithCustomCode(); 
@@ -72,7 +72,7 @@ class HostedServiceParseTask extends Runnable
             
             ResponderProcessor::sendResult( $this->rai->getId(), $invocation_result );
             
-            echo $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime );
+            //echo $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime );
                 
         } catch( Exception $e ) { 
             

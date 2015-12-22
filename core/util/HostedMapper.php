@@ -131,8 +131,7 @@ class HostedMapper
     
     public function prepareResult( &$result ) {
         
-        var_dump("TODO pepareResultItem");
-        if( isset( $result[0] ) ) {
+        if( is_array( $result ) ) {
             
             foreach ( $result as $index => $result_data ) {
                 
@@ -146,15 +145,67 @@ class HostedMapper
             
         }
         
-        return $result;
-        
     }
     
     private function prepareResultItem( $item ) {
         
         if( is_object( $item ) ) {
+          
+            $data_array = [];
+
+            $reflection = new ReflectionClass( $item );
+            $props = $reflection->getProperties();
+
+            foreach ( $props as $prop ) {
+
+                $prop->setAccessible( true );
+                $data_array[ $prop->getName() ] =  $prop->getValue( $item );
+
+            }
+
+            // dinamic declared
+            $obj_vars = get_object_vars( $item );
+
+            if( isset( $data_array ) && $data_array !== null ) {
+
+                $data_array = array_merge( $data_array, $obj_vars );
+
+            } else {
+
+                $data_array = $obj_vars;
+
+            }
             
+            foreach ( $data_array as $data_key => $data_val ) {
+
+                if( gettype( $data_val ) == "object" ) {
+
+                    $data_array[ $data_key ] = $this->prepareResultItem( $data_val );
+
+                } elseif( is_array( $data_val ) ) { // if relation one to many
+                
+                    foreach ( $data_val as $index => $val  ) {
+                    
+                        if( gettype( $val ) == "object" ) {
+
+                            $data_array[ $data_key ][ $index ] = $this->prepareResultItem( $val );
+                        
+                        }
+                    }
+                
+                }
+            }
             
+            return $data_array;
+            
+        } elseif( is_array( $item ) ) {
+            
+            $this->prepareResult( $item );
+            return $item;
+            
+        } else{
+            
+            return $item;
             
         }
         

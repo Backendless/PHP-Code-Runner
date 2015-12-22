@@ -42,15 +42,6 @@ class CodeExecutor
             
         }
         
-        if ( GlobalState::$TYPE === 'CLOUD') {
-        
-            Config::$RELATIVE_PATH  =   $msg['relativePath'];
-            Config::$TASK_APPLICATION_ID = $msg['applicationId'];
-            
-            ClassManager::analyze( PathBuilder::getClasses() );
-            
-        }
-
         $event_handler = $this->event_handlers_model->getEventHandler( $rmi->getEventid(), $rmi->getTarget() );
 
         $invocation_task = new InvocationTask(  $rmi, $event_handler );

@@ -70,7 +70,7 @@ class PathBuilder
 
             $path = rtrim( Config::$REPO_PATH, "/" );
                 
-            $path = realpath( getcwd() . DS . $path ) . DS . strtolower( $app_version_id ) . DS . $relative_path;
+            $path = realpath( getcwd() . DS . $path  . DS . strtolower( $app_version_id ) . DS . $relative_path . DS . strtolower( $app_version_id ) );
         
             Log::writeInfo( "Build path to hosted code : " . $path , "file" );
 
