@@ -5,6 +5,7 @@ use backendless\core\runtime\concurrent\Runnable;
 use backendless\core\parser\HostedServiceParser;
 use backendless\core\processor\ResponderProcessor;
 use backendless\core\commons\InvocationResult;
+use backendless\core\util\PathBuilder;
 use backendless\core\util\XmlManager;
 use backendless\core\Config;
 use backendless\core\lib\Log;
@@ -36,13 +37,17 @@ class HostedServiceParseTask extends Runnable
 
         try{       
             
-            $hosted_parser = new HostedServiceParser();
+            $hosted_parser = new HostedServiceParser( 
+                                                        PathBuilder::getHostedService( $this->rai->getAppVersionId(), $this->rai->getRelativePath() ), 
+                                                        $this->rai->getId()
+                                                    );
             
             $hosted_parser->parseFolderWithCustomCode(); 
             
             if( $hosted_parser->isError() ) {
                 
-                return ResponderProcessor::sendResult( $this->rai->getId(), $hosted_parser->getErrorAsJson() ); 
+                Log::writeError( $hosted_parser->getError() );
+                return ResponderProcessor::sendResult( $this->rai->getId(), $hosted_parser->getError() ); 
                 
             }
             
@@ -66,7 +71,8 @@ class HostedServiceParseTask extends Runnable
             $invocation_result->setArguments( ["xml" => $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime ) ] );
             
             ResponderProcessor::sendResult( $this->rai->getId(), $invocation_result );
-
+            
+            echo $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime );
                 
         } catch( Exception $e ) { 
             
@@ -75,6 +81,5 @@ class HostedServiceParseTask extends Runnable
         }
     
   }
-
-     
+      
 }

@@ -201,5 +201,42 @@ class XmlManager
         }
         
     }
+    
+    public function getMethodDescription( $path_to_xml, $method_name ) {
+        
+        $domtree = new DOMDocument('1.0', 'ISO-8859-1');
+        $domtree->load( $path_to_xml );
+        
+        $xpath = new DOMXpath( $domtree );
+        
+        $method_node = $xpath->query( '//service //method[@name="'. $method_name .'"]' );
+        
+        $description = [];
+        
+        if ( $method_node->item(0)->hasChildNodes() ) {
+                
+                $childs = $method_node->item(0)->childNodes;
+
+                foreach( $childs as $item ) {
+                    
+                    if( is_a( $item, "DOMElement") ) { 
+                                                
+                        $array_item = [];
+                        
+                        $array_item[ 'name' ] = $item->getAttribute( 'name' );
+                        $array_item[ 'type' ] = $item->getAttribute( 'type' );
+                        
+                        
+                        $description[] = $array_item;
+                        
+                    }
+                    
+                }
+            
+        }
+        
+        return $description;
+        
+    }
 
 }

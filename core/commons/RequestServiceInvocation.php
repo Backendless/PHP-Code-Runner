@@ -2,6 +2,7 @@
 namespace backendless\core\commons;
 
 use backendless\core\commons\AbstractRequest;
+use backendless\core\commons\InitAppData;
 
 
 class RequestServiceInvocation extends AbstractRequest
@@ -16,24 +17,44 @@ class RequestServiceInvocation extends AbstractRequest
     private $invocation_context;
     private $properies;
     private $arguments;
+    private $lang;
     private $decoded_arguments;
-    
+
     public function __construct( $msg ) {
 
         parent::__construct();
-
-        $this->setServiceId( $msg['serviceId'] )
-             ->setServiceVersionId( $msg['serviceVersionId'] )
-             ->setFileType( $msg['fileType'] )   
-             ->setClassName( $msg['className']  )
+        
+        $this->setAppVersionId( $msg['appVersionId'] )
              ->setMethod( $msg['method'] )
-             ->setInitAppData( $msg['initAppData'] )   
-             ->setInvocationContext( $msg['invocationContext'] )
-             ->setProperties( $msg['properties'] )
+             ->setServiceVersionId( $msg['serviceVersionId'] )
+             ->setClassName( $msg['className']  )
+             ->setTimeout( $msg['timeout'] )
+             ->setInitAppData( $msg['initAppData'] )
+             ->setInvocationContext( $msg['invocationContextDto'] )
+             ->setRelativePath( $msg['relativePath'] )   
              ->setArguments( $msg['arguments'] )
-             ->setRelativePath( $msg['relativePath'] );   
+             ->setId( $msg['id'] )
+             ->setApplicationId( $msg['applicationId'] )
+             ->setLang( $msg['lang'] )
+             ->setServiceId( $msg['serviceId'] )
+             ->setFileType( $msg['fileType'] )
+             ->setProperties( $msg['properties'] )
+             ->setTimestamp( $msg['timestamp'] );
         
         $this->decoded_arguments = null;
+        
+    }
+    
+    public function setLang( $lang ) {
+        
+        $this->lang = $lang;
+        return $this;        
+        
+    }
+    
+    public function getLang() {
+        
+        return $this->lang;
         
     }
 
@@ -77,7 +98,16 @@ class RequestServiceInvocation extends AbstractRequest
     
     public function setArguments( $arguments ) {
       
-        $this->arguments = $arguments;
+        $this->arguments = '';
+
+        foreach ( $arguments as $code ) {
+
+            $this->arguments .= chr( $code ); //ASC||
+
+        }
+        
+        $this->arguments = json_decode( $this->arguments , true );
+
         return $this;
         
     }
@@ -110,6 +140,18 @@ class RequestServiceInvocation extends AbstractRequest
     public function getClassName() {
         
         return $this->class_name;
+    }
+    
+    public function getShortClassName() {
+        
+        $parts = explode( '\\', $this->class_name );
+        
+        if( count( $parts ) > 1 ) {
+            return array_pop( $parts );
+        }
+        
+        return $this->class_name;
+        
     }
 
     public function setClassName( $class_name ) {
@@ -151,6 +193,12 @@ class RequestServiceInvocation extends AbstractRequest
     }
 
     public function setInitAppData( $init_app_data ) {
+        
+        if( is_array($init_app_data) ) {
+            
+            $init_app_data = new InitAppData( $init_app_data );
+            
+        }
         
         $this->init_app_data = $init_app_data;
         return $this;

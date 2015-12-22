@@ -78,7 +78,7 @@ class ResponderProcessor
             
         } else {
             
-            $result_data = $result['result'];
+            $result_data = json_encode($result['result']);
             
         }
         

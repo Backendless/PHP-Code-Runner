@@ -103,27 +103,6 @@ class CodeRunnerUtil
 
         $http_request = new HttpRequest();
         
-//        $json = '{  
-//   "applicationId":"E3BD3A54-9A07-6160-FF70-A824A9610800",
-//   "appVersionId":"v1",
-//   "handlers":[  
-//      {  
-//         "id":101,
-//         "async":"true",
-//         "target":"Order",
-//         "timer":false,
-//         "provider":"com.backendless.ordermanagement.events.persistence_service.OrderTableEventHandler"
-//      },
-//      {  
-//         "id":100,
-//         "async":false,
-//         "target":"Order",
-//         "timer":false,
-//         "provider":"com.backendless.ordermanagement.events.persistence_service.OrderTableEventHandler"
-//      }
-//   ]
-//}';
-        
         $http_request->setTargetUrl($target)
                      ->setHeader(self::$APP_ID_KEY, Config::$APPLICATION_ID)
                      ->setHeader(self::$SECRET_KEY, Config::$SECRET_KEY)
@@ -181,19 +160,6 @@ class CodeRunnerUtil
         }
         
   }
-
-    public function downloadServerCodeFile( $applicationId, $appVersionId, $type ) {
-        
-//        WebTarget target = client.target( Config.SERVER_URL ).path( "/servercode/" + type + "/" + appVersionId + "/" + Lang.JAVA );
-//        Response response = target.request().header( APP_ID_KEY, applicationId ).get();
-//        if( response.getStatus() != 200 )
-//        {
-//          throw new CodeRunnerException( "Can not download file from url: " + target.getUri().toString() );
-//        }
-//        return response.readEntity( File.class );
-//      }
-//
-    }    
 
     public function getExternalHost() {
         

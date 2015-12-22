@@ -4,7 +4,7 @@ namespace backendless\core;
 use backendless\core\CodeRunner;
 use backendless\core\commons\holder\EventDefinitionHolder;
 use backendless\core\lib\Log;
-use backendless\core\lib\Autoload;
+use backendless\core\util\PathBuilder;
 use backendless\core\util\ClassManager;
 
 class  CodeRunnerLoader
@@ -25,12 +25,12 @@ class  CodeRunnerLoader
         
         EventDefinitionHolder::getInstance()->load();
         
-        if( GlobalState::$TYPE === 'LOCAL') {
+        if( GlobalState::$TYPE === 'LOCAL' ) {
             
             self::checkForInputKeys( $argc, $argv );
             self::checkDefaultKeys();
             
-            ClassManager::analyze();
+            ClassManager::analyze( PathBuilder::getClasses() );
             
             self::printGreeting();
         

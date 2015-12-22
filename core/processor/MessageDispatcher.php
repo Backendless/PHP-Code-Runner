@@ -24,7 +24,7 @@ class MessageDispatcher
     public function  onMessageReceived( $msg ) {
         
         $msg = json_decode( $msg, true );
-
+        
         if( isset( $msg["___jsonclass"] ) ) {
             
             $class_name_parts = explode( "." , $msg["___jsonclass"] );

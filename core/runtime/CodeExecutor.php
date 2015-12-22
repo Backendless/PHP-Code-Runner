@@ -6,6 +6,7 @@ use backendless\core\parser\EventModelParser;
 use backendless\core\Config;
 use backendless\core\GlobalState;
 use backendless\core\util\ClassManager;
+use backendless\core\util\PathBuilder;
 use backendless\core\runtime\task\InvocationTask;
 use backendless\core\runtime\task\HostedServiceParseTask;    
 use backendless\core\runtime\task\HostedServiceInvocationTask;
@@ -46,7 +47,7 @@ class CodeExecutor
             Config::$RELATIVE_PATH  =   $msg['relativePath'];
             Config::$TASK_APPLICATION_ID = $msg['applicationId'];
             
-            ClassManager::analyze();
+            ClassManager::analyze( PathBuilder::getClasses() );
             
         }
 
@@ -74,6 +75,12 @@ class CodeExecutor
   }
   
    public function invokeService( $rsi ) {
+       
+        if ( GlobalState::$TYPE === 'CLOUD') {
+            
+            ClassManager::analyzeHosted( PathBuilder::getHostedService( $rsi->getAppVersionId(), $rsi->getRelativePath() ), false );
+            
+        }
         
         $invocation_task = new HostedServiceInvocationTask( $rsi );
         $invocation_task->runImpl();

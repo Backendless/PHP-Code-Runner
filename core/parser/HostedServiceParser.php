@@ -1,34 +1,51 @@
 <?php
 namespace backendless\core\parser;
 
+use backendless\core\processor\ResponderProcessor;
 use backendless\core\Config;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use backendless\core\lib\Log;
+use RecursiveCallbackFilterIterator;
+use Exception;
+use ReflectionProperty;
 use ReflectionClass;
-
+use ReflectionMethod;
 use RegexIterator;
+
 
 
 class HostedServiceParser {
 
     protected $base_interface_name;
+    
     protected $interface_implementation;
     protected $interface_implementation_info;
+    
     protected $classes_holder;
     protected $path_to_classes;
     protected $parsing_error;
     
-    protected $is_exist_interface;
+    protected $used_classes;
+    
+    protected $path = null;
+    protected $rai_id;
 
-    public function __construct() {
+    protected $is_exist_interface;
+    
+
+    public function __construct( $path , $rai_id) {
         
         $this->base_interface_name = Config::$CORE["hosted_interface_name"];
         $this->interface_implementation_info = null;
         $this->path_to_classes = [];
-        $this->i_base_service = null;
         $this->parsing_error = null;
         $this->is_exist_interface = false;
+        
+        $this->used_classes = [];
+        
+        $this->path = $path;
+        $this->rai_id = $rai_id;
         
     }
     
@@ -41,8 +58,20 @@ class HostedServiceParser {
     
     protected function scanDirectory( ) {
         
-        $all_files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( "../classes" ) );
-        $php_files = new RegexIterator($all_files, '/\.php$/');
+        $skip_folders = [ 'lib' ]; // lib folder can contain libraries which needed user
+                
+        $files_iterator = new RecursiveIteratorIterator(
+                                                        new RecursiveCallbackFilterIterator(
+                                                            new RecursiveDirectoryIterator(
+                                                                $this->path
+                                                            ),
+                                                            function ( $fileInfo, $key, $iterator ) use ( $skip_folders ) {
+                                                                        return $fileInfo->isFile() || !in_array( $fileInfo->getBaseName(), $skip_folders );
+                                                            }
+                                                        )
+                                                       );
+                                                        
+        $php_files = new RegexIterator( $files_iterator, '/\.php$/');
         
         foreach ( $php_files as $php_file) {
             
@@ -50,7 +79,8 @@ class HostedServiceParser {
             
         }
         
-        if( count( $this->path_to_classes) <=0 ) {
+   
+        if( count( $this->path_to_classes) <= 0 ) {
             
             $this->parsing_error["code"] = 1;
             $this->parsing_error["msg"] = "Not found any files for parsing.";
@@ -64,13 +94,29 @@ class HostedServiceParser {
     
     protected function scanCode( ) {
         
+        $class_description_list = [];
+        
         foreach ( $this->path_to_classes as $index=>$path ) {
             
-            $this->parseFile( $path );
+            $description_item = $this->parseFile( $path );
+            
+            if( $description_item !== null ) {
+                
+                $class_description_list[] = $description_item;
+                        
+            }
             
         }
         
         $this->parseServiceImplement( $this->interface_implementation_info );
+        
+        foreach ( $class_description_list as $description_item ) {
+        
+            $this->parseServiceDataClass( $description_item );
+            
+        }
+        
+        $this->deleteUnusedClasses();
         
         if( $this->is_exist_interface === false ) {
             
@@ -127,21 +173,26 @@ class HostedServiceParser {
             
             $matches_implementation = [];
             
-            //check if exist any class in file if interface implementation
+            //check if interface implementation
             
             if( preg_match( '/^.*implements(\s*)(.*?)(' . $this->base_interface_name . ')(.*)$/m', $matches_class[3], $matches_implementation) ) {
                
                 $this->is_exist_interface = true;
                 $this->interface_implementation_info = $class_description;
                 
+                return null;
+                
             } else {
                 
-                $this->parseServiceDataClass( $class_description );
+                return $class_description;
+                
             }
                 
         } else {
             
-            Log::writeInfo("Hosted Service persing: skip file " .$path, 'file');
+            Log::writeInfo("Hosted Service persing: skip file " . $path , 'file');
+            
+            return null;
             
         }
         
@@ -155,58 +206,133 @@ class HostedServiceParser {
         
         $reflector = new ReflectionClass( $full_class_name );
         
-        $methods = $reflector->getMethods();
+        $methods = $reflector->getMethods( ReflectionMethod::IS_PUBLIC ); //only public methods
+        
+        $reflection_property = $reflector->getProperty('_mapping');
+        $reflection_property->setAccessible( true );
+        $mapping_rules = $reflection_property->getValue( new $full_class_name() );
         
         $methods_description = [ 'class_description' => $class_description, 'methods' =>[] ];
         $method_info = [];
         $args_info = [];
         
-        foreach ( $methods as $method ) {
-            
-            $method_info['name'] = $method->getName();
-            
-            $params = $method->getParameters();
-            
-            $info = [];
-            
-            foreach ( $params as $param ) {
-                
-                $info['name'] = $param->getName();
-                
-                if( $param->getClass() !== null ) {
-                    
-                    $info['type'] = $param->getClass()->name;
-                    
-                } else {
-                    
-                    $info['type'] = '';
-                    
-                }
-                
-                $args_info[] = $info;
+        try {
+        
+            foreach ( $methods as $method ) {
 
+                $method_info['name'] = $method->getName();
+                $params = $method->getParameters();
                 $info = [];
+
+                foreach ( $params as $param ) {
+
+                    $info['name'] = $param->getName();
+
+                    if( $param->getClass() !== null ) {
+
+                        $info['type'] = $param->getClass()->name; // set type of class from code definition
+                        $this->addClassToUsedList( $param->getClass()->name );
+
+                    } else {
+
+                        if( isset( $mapping_rules[ $method->getName() ] ) ) {  // set type of class from mapping definition
+
+                            if( isset( $mapping_rules[ $method->getName() ][ $param->getName() ] ) ) {
+
+                                $info['type'] = $mapping_rules[ $method->getName() ][ $param->getName() ];  
+
+                                $this->addClassToUsedList( $mapping_rules[ $method->getName() ][ $param->getName() ] );
+
+                            } else {
+
+                                $info['type'] = '';
+
+                            }
+
+                        } else {
+
+                            $info['type'] = '';
+
+                        }
+
+                    }
+
+                    $args_info[] = $info;
+
+                    $info = [];
+
+                }
+
+                $method_info['arg'] = $args_info; 
+                $args_info = [];
+
+                $methods_description['methods'][] = $method_info;
+                unset( $method_info );
+
+            }
+        
+        } catch ( Exception $e ) {
+            
+            $error = [];
+            
+            if( preg_match('/^Class (.*)? does not exist$/', $e->getMessage(), $matches ) ) {
+            
+                $error["code"] = 22;
+                $error["msg"] = $e->getMessage() . ". Class $matches[1] don't declared or missing including file with class.";
+                
+            } else {
+                
+                $error["code"] = '';
+                $error["msg"] = $e->getMessage();
                 
             }
-            
-            $method_info['arg'] = $args_info; 
-            $args_info = [];
-            
-            $methods_description['methods'][] = $method_info;
-            unset( $method_info );
-            
-        }
+                        
+            ResponderProcessor::sendResult( $this->rai_id, $error );
+                
+            throw new Exception( $error["msg"] );
         
+        }
         
         $this->interface_implementation = $methods_description;
         
     }
-    
-    private function parseServiceDataClass( $class_description ){
+
+    private function addClassToUsedList( $class_full_name ) {
         
-        include $class_description["path"];
+        //TODO; // Also add related classes of relation if relation mapping will be approved
+        
+        if( ! in_array( $class_full_name, $this->used_classes) ) { // fix duplicate classes
+            
+            $this->used_classes[ ] =  $class_full_name;
+            
+        }
+       
+    }
+    
+    private function deleteUnusedClasses() {
+        
+        foreach ( $this->classes_holder as $key => $class_definition ) {
+            
+            if( !in_array( $class_definition['fullname'], $this->used_classes ) ) {
+                
+                unset( $this->classes_holder[ $key ] );
+            }
+            
+        }
+        
+        $this->classes_holder = array_values( $this->classes_holder ); // re-index array
+        
+    }
+   
+    private function parseServiceDataClass( $class_description ) {
         
         $full_class_name = ( $class_description['namespace'] != null ) ? "\\" . $class_description['namespace'] . "\\" . $class_description["name"] : "\\" . $class_description["name"];
+
+        if( ! class_exists( $full_class_name ) ) {
+            
+            include $class_description["path"];
+            
+        }
         
         $props = ( new ReflectionClass( $full_class_name ) )->getProperties();
 
@@ -218,11 +344,10 @@ class HostedServiceParser {
 
         } 
         
-        $class_description['fullname'] = $full_class_name;
+        $class_description['fullname'] = trim( $full_class_name, "\\" );
         $class_description['field'] =   $props_array;
         
         $this->classes_holder[] = $class_description;
-
         
     }
     
@@ -236,9 +361,9 @@ class HostedServiceParser {
 //        
 //  }
     
-    public function getErrorAsJson() {
+    public function getError() {
         
-        return json_encode( $this->parsing_error );
+        return $this->parsing_error;
         
     }
     

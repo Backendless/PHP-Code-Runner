@@ -90,7 +90,7 @@ abstract class AbstractRequest
     public function setRelativePath( $relative_path ) {
         
         $this->relative_path = $relative_path;
-        return $relative_path;
+        return $this;
       
     }
   
