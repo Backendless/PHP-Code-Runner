@@ -55,7 +55,6 @@ class  CodeRunnerLoader
         
         Log::writeInfo( "CodeRunner session is running for 2 hour and will be terminated on: " 
                         . date( "H:i:s", strtotime('+2 hours')) . " ( for you timezone: '" . date_default_timezone_get() . " ')", $target = 'console' );
-        die();
         
     }
 
