@@ -53,6 +53,9 @@ class  CodeRunnerLoader
         Log::write("Copyright(C) " . date("Y", time()) . " Backendless Corp. All rights reserved.", $target = 'console');
         Log::write( "Version: " . Config::$VERSION . " \n", $target = 'console' );
         
+        Log::writeInfo( "CodeRunner session is running for 2 hour and will be terminated on: " 
+                        . date( "H:i:s", strtotime('+2 hours')) . " ( for you timezone: '" . date_default_timezone_get() . " ')", $target = 'console' );
+        
     }
 
     
@@ -214,9 +217,23 @@ class  CodeRunnerLoader
     }
       
     public static function  phpEnviromentInit() {
-          
-        //set default timezone need for WIN and OS X
-        date_default_timezone_set('UTC');
+        
+        if ( GlobalState::$TYPE === 'LOCAL' ) {
+        
+             //for LOCAL use user time zone or UTC if not set
+             $timezone = @date_default_timezone_get(); // if not set default timezone set as UTC
+             
+             if( $timezone == 'UTC') {
+                 
+                 date_default_timezone_set('UTC');
+                 
+             }
+            
+        } else {
+            
+            date_default_timezone_set('UTC'); // for CLOUDE use UTC
+            
+        }
         
         // check if available openssl for use https
         if( ! extension_loaded("openssl") ) {
@@ -229,6 +246,6 @@ class  CodeRunnerLoader
             
         }
          
-          
+       
       }
 }
