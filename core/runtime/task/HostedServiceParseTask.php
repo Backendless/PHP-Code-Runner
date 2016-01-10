@@ -72,9 +72,9 @@ class HostedServiceParseTask extends Runnable
             $invocation_result = new InvocationResult();
             $invocation_result->setArguments( ["xml" => $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime ) ] );
             
-            $xml = $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime );
-            file_put_contents("../repo/e3bd3a54-9a07-6160-ff70-a824a9610800/servercode/services/E3BD3A54-9A07-6160-FF70-A824A9610800.xml", $xml);
-            echo $xml; return;
+//            $xml = $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime );
+//            file_put_contents("../repo/e3bd3a54-9a07-6160-ff70-a824a9610800/servercode/services/E3BD3A54-9A07-6160-FF70-A824A9610800.xml", $xml);
+//            echo $xml; return;
             
             ResponderProcessor::sendResult( $this->rai->getId(), $invocation_result );
             
