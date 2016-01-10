@@ -59,9 +59,10 @@ class ResponderProcessor
         
         $result = array_shift( self::$results_queue );
             
-            if( $result === null ) {
+        if( $result === null ) {
                 
-                return;
+            return;
+            
         }
 
         $http_request = new HttpRequest();

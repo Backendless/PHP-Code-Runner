@@ -99,6 +99,7 @@ class CodeRunner
             
             if( GlobalState::$TYPE == 'CLOUD' ) {
 
+                // add send message about error to redis/driver.
                 return;
 
             }
@@ -397,7 +398,6 @@ class CodeRunner
     }
     
     private function tryStopDebugIdUpdater() {
-        
         
         if( file_exists( ".run" ) ) {
             

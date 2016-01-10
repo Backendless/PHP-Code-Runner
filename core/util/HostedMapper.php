@@ -3,68 +3,94 @@ namespace backendless\core\util;
 
 use backendless\core\util\XmlManager;
 use ReflectionClass;
+use backendless\core\Config;
+use backendless\core\parser\HostedServiceParser;
 
 class HostedMapper
 {
     
     private $mapping_error;
-    
-    public function __construct() {
+    protected $service_arg_mapping;
+    protected $data_model_properties;
+    protected $scalar_types = [ 'boolean', 'int', 'integer', 'float', 'string', 'String', 'array', 'Array' ];
+    protected $xml_manager;
+
+    public function __construct( $path = null, $app_version_id = null ) {
         
         $this->mapping_error = null;
+        $this->xml_manager = new XmlManager();
+        
+        if( $path != null && $app_version_id != null ) {
+            
+            $xml_path = realpath( $path . DS . ".." ) . DS . $app_version_id . ".xml";
+            $this->xml_manager->loadDomtree( $xml_path );
+            
+        }
         
     }
 
+    public function prepareArguments( &$arguments, $method_name ) {
+        
+        $method_description = $this->xml_manager->getMethodDescription( $method_name );
 
-    public function prepareArguments( &$arguments, $path, $app_version_id, $method_name ) {
-        
-        $xml_path = realpath( $path . DS . ".." ) . DS . $app_version_id . ".xml";
-        
-        $xml_manager = new XmlManager();
-        
-        $method_description = $xml_manager->getMethodDescription( $xml_path, $method_name );
-        
         foreach ( $method_description as $index => $arg_item ) {
             
-            if( $arg_item[ 'type' ] != "" ) {
+            if( !in_array( $arg_item['type'], $this->scalar_types ) ) {
                 
-                $arguments[ $index ] = $this->convertToClass( $arguments[ $index ], $arg_item[ 'type' ] );
+                $this->convertToClass( $arguments[ $index ], $this->getTypeInfo( $arg_item[ 'type' ] ) );
                 
             }
             
         }
         
-        
     }
     
-    private function convertToClass( $data, $class_name ) {
+    private function convertToClass( &$data, $type ) {
         
-        if( ! class_exists( $class_name ) ) {
+        if( ! class_exists( $type['class'] ) ) {
             
             $this->mapping_error = [
                                         "code" => 10,
-                                        "message" => "Class $class_name don't declared or missing including file with class"    
+                                        "msg" => "Class {$type['class']} don't declared or missing including file with class"    
                                 ];
             
             return;
             
         }
         
-        if( isset( $data[0] ) ) {
+        if( $type['collection'] == true ) { // array of classes
             
             foreach ( $data as $index=>$class_data ) {
                 
-                $data[ $index ] = $this->convertToClassItem( $class_data, $class_name );
+                $data[ $index ] = $this->convertToClassItem( $class_data, $type['class'] );
                 
             }
             
-        } else {
+        } else { // single class
             
-            $data = $this->convertToClassItem( $data, $class_name );
+            $data = $this->convertToClassItem( $data, $type['class'] );
             
         }
         
-        return $data;
+    }
+    
+    protected function getTypeInfo( $type ) {
+
+        $type_info = [];
+
+        if( preg_match( '/(.*)(\[\s*\])/', $type, $matches ) ) {
+
+            $type_info['class'] = $matches[1];
+            $type_info['collection'] = true;
+
+        } else {
+
+            $type_info['class'] = $type;
+            $type_info['collection'] = false;
+
+        }
+        
+        return $type_info;
         
     }
     
@@ -72,40 +98,58 @@ class HostedMapper
         
         $obj = new $class_name();
         
-        $props = (new ReflectionClass( $obj ) )->getProperties();
+        $class_description = $this->xml_manager->getClassDescription( $class_name );
+        
+        $props = ( new ReflectionClass( $obj ) )->getProperties();
 
         foreach ( $props as $prop) {
 
             $prop->setAccessible( true );
             
             if( isset( $class_data[ $prop->getName() ] ) ) {
-                    
+                
+                foreach ( $class_description as $index => $type_descr ) {
+            
+                    if( !in_array( $type_descr['type'], $this->scalar_types ) && $type_descr['name'] == $prop->getName() ) {
+
+                        $this->convertToClass( $class_data[ $prop->getName() ], $this->getTypeInfo( $type_descr[ 'type' ] ) );
+                        unset( $class_description[ $index ] );
+
+                    }
+            
+                }
+                
                 $prop->setValue( $obj, $class_data[ $prop->getName() ] );
-                
-                    //in future add logic for classes relation here
-                
+              
+            
+               unset( $class_data[ $prop->getName() ] );
+               
             }
             
-            unset( $class_data[ $prop->getName() ] );
         }
         
-        $this->setUndeclaredProperties( $class_data, $obj );
+        $this->setUndeclaredProperties( $class_data, $obj, $class_description );
         
         return $obj;
         
     }
     
-    protected function setUndeclaredProperties( &$data, &$obj ) {
+    private function setUndeclaredProperties( &$data, &$obj, &$class_description ) {
         
         foreach ( $data as $name => $val ) {
-
-            if( !is_array( $data[ $name ] ) ) {
-                    
-                $obj->{$name} = $val;
-                
-            } 
             
-            //in future add logic for classes relation here
+            foreach ( $class_description as $index => $type_descr ) {
+
+                if( !in_array( $type_descr['type'], $this->scalar_types ) && $type_descr['name'] == $name ) {
+
+                    $this->convertToClass( $data[ $name ], $this->getTypeInfo( $type_descr[ 'type' ] ) );
+                    unset( $class_description[ $index ] );
+
+                }
+
+            }
+              
+            $obj->{$name} = $data[ $name];
 
         }
         
@@ -163,7 +207,7 @@ class HostedMapper
 
             }
 
-            // dinamic declared
+            // dynamic declared
             $obj_vars = get_object_vars( $item );
 
             if( isset( $data_array ) && $data_array !== null ) {
@@ -210,5 +254,4 @@ class HostedMapper
         }
         
     }
-
 }

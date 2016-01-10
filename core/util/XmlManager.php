@@ -18,7 +18,8 @@ class XmlManager
     
     private $field_tag_attributes = [ 
                                         'name'  =>  'name', 
-                                        'type'  =>  'type', 
+                                        'type'  =>  'type',
+                                        'elementType'  => 'element_type',   
                                         'fulltype'  =>  'fulltype',
                                         'nativetype'    =>  'nativetype',
                                         'javatype'  =>  'javatype'
@@ -27,10 +28,10 @@ class XmlManager
     private $method_tag_attributes = [
                                         'name'  =>  'name',
                                         'type'  =>  'type',
-                                        'neutralname'   =>  'neutralname',
+                                        //'neutralname'   =>  'neutralname',
                                         'nativetype'    =>  'nativetype',
                                         'javatype'   =>  'javatype',
-                                        'containsvalues'    =>  'containsvalues'
+                                        //'containsvalues'    =>  'containsvalues'
                                       ];
     
     private $arg_tag_attributes =   [
@@ -38,6 +39,7 @@ class XmlManager
                                         'type'  =>  'type',
                                         'elementType'   =>  'elementType',
                                         'nativetype'    =>  'nativetype',
+                                        'elementType'  => 'element_type',
                                         'javatype'  =>  'javatype'
                                     ];
     
@@ -51,6 +53,16 @@ class XmlManager
                                             'generationMode'    =>  'generationMode',
                                             'randomUUID'    =>  'randomUUID'
                                         ];
+    
+    private $service_tag_attributes =   [
+                                            'name'          =>  'name',
+                                            'fullname'      =>  'fullname',
+                                            'namespace'     =>  'namespace',
+                                            'endpointURL'   =>  'endpointURL',
+                                        ];
+    
+    private $loaded_domtree = null;
+    private $xpath = null;
 
     public function buildXml( $data_array, $runtime_vars ) {
         
@@ -65,7 +77,7 @@ class XmlManager
         $runtime = $domtree->createElement( "runtime" );
         $root->appendChild( $runtime );
 
-        $this->fillAttributes( $runtime, $this->runtime_tag_attributes, $runtime_vars );
+        $this->fillAttributes( $runtime, $this->runtime_tag_attributes, $runtime_vars, false );
 
         foreach ( $data_array["datatype"] as $class_info ) {
 
@@ -73,7 +85,11 @@ class XmlManager
             
         }
         
-        $this->addNodeByNamespace( $this->builServiseNode( $data_array['service']['methods'], $domtree ), $domtree, $root,  $data_array['service']['class_description']['namespace'] );
+        $this->addNodeByNamespace(  $this->builServiseNode( $data_array['service']['class_description'], $data_array['service']['methods'], $domtree ), 
+                                    $domtree, 
+                                    $root,  
+                                    $data_array['service']['class_description']['namespace'] 
+                                 );
         
         return $domtree->saveXML();
         
@@ -136,14 +152,14 @@ class XmlManager
         
         $data_type = $domtree->createElement( "datatype" );
         
-        $this->fillAttributes( $data_type, $this->datatype_tag_attributes, $class_info );
+        $this->fillAttributes( $data_type, $this->datatype_tag_attributes, $class_info, false );
         
         
         foreach ( $class_info['field'] as $field_item ){
             
             $field = $domtree->createElement( "field" );
 
-            $this->fillAttributes( $field, $this->field_tag_attributes, $field_item );
+            $this->fillAttributes( $field, $this->field_tag_attributes, $field_item, false );
             
 
             $data_type->appendChild( $field );
@@ -153,29 +169,36 @@ class XmlManager
         
     }
     
-    private function builServiseNode( &$methods_info, $domtree ) {
+    private function builServiseNode( &$service_description, &$methods_info, $domtree ) {
                 
         $service_node = $domtree->createElement( "service" );
+        $this->fillAttributes( $service_node, $this->service_tag_attributes, $service_description, false );
         
-        $methd_node = '';
+        $method_node = '';
         $arg_node = '';
         
         foreach ( $methods_info as $method_item ) {
             
-            $methd_node = $domtree->createElement( "method" );
+            $method_node = $domtree->createElement( "method" );
             
-            $this->fillAttributes( $methd_node, $this->method_tag_attributes, $method_item );
+            $this->fillAttributes( $method_node, $this->method_tag_attributes, $method_item, false );
+            
+            if( isset( $method_item['return_type'] ) ) {
+                
+                $this->fillAttributes( $method_node, $this->method_tag_attributes, $method_item['return_type'], false );
+                
+            }
             
             foreach ( $method_item['arg'] as $arg_item ) {
                 
                 $arg_node = $domtree->createElement( "arg" );
                 
-                $this->fillAttributes($arg_node, $this->arg_tag_attributes, $arg_item );
+                $this->fillAttributes($arg_node, $this->arg_tag_attributes, $arg_item, false );
                 
-                $methd_node->appendChild( $arg_node );
+                $method_node->appendChild( $arg_node );
             }
             
-            $service_node->appendChild( $methd_node );
+            $service_node->appendChild( $method_node );
             
         }
         
@@ -184,7 +207,6 @@ class XmlManager
     }
     
     private function fillAttributes( $tag, $attributes_description,  &$data_array , $add_empty = true ) {
-        
         
         foreach ( $attributes_description as $attribute_name => $index_in_data ) {
             
@@ -202,37 +224,99 @@ class XmlManager
         
     }
     
-    public function getMethodDescription( $path_to_xml, $method_name ) {
+    public function loadDomtree( $path_to_xml ) {
+
+        if( $this->loaded_domtree == null) {
+            
+            $this->loaded_domtree = new DOMDocument('1.0', 'ISO-8859-1');
+            $this->loaded_domtree->load( $path_to_xml );
+            
+        }
         
-        $domtree = new DOMDocument('1.0', 'ISO-8859-1');
-        $domtree->load( $path_to_xml );
+        return $this;
+    }
+    
+    protected function initXpath() {
+
+        if( $this->xpath == null) {
+            
+            $this->xpath = new DOMXpath( $this->loaded_domtree );
+            
+        }
         
-        $xpath = new DOMXpath( $domtree );
+        return $this;
         
-        $method_node = $xpath->query( '//service //method[@name="'. $method_name .'"]' );
+        
+    }
+        
+    public function getMethodDescription(  $method_name ) {
+        
+        $this->initXpath();
+        
+        $method_node = $this->xpath->query( '//service //method[@name="'. $method_name .'"]' );
         
         $description = [];
         
-        if ( $method_node->item(0)->hasChildNodes() ) {
-                
-                $childs = $method_node->item(0)->childNodes;
-
-                foreach( $childs as $item ) {
-                    
-                    if( is_a( $item, "DOMElement") ) { 
-                                                
-                        $array_item = [];
-                        
-                        $array_item[ 'name' ] = $item->getAttribute( 'name' );
-                        $array_item[ 'type' ] = $item->getAttribute( 'type' );
-                        
-                        
-                        $description[] = $array_item;
-                        
-                    }
-                    
-                }
+        if( $method_node->item(0) != null ) {
             
+            if ( $method_node->item(0)->hasChildNodes() ) {
+
+                    $childs = $method_node->item(0)->childNodes;
+
+                    foreach( $childs as $item ) {
+
+                        if( is_a( $item, "DOMElement") ) { 
+
+                            $array_item = [];
+
+                            $array_item[ 'name' ] = $item->getAttribute( 'name' );
+                            $array_item[ 'type' ] = $item->getAttribute( 'type' );
+
+
+                            $description[] = $array_item;
+
+                        }
+
+                    }
+
+            }
+        }
+        
+        return $description;
+        
+    }
+    
+    public function getClassDescription( $class_name ) {
+        
+        $this->initXpath();
+        
+        $class_node = $this->xpath->query( '//datatype[@fullname="'. $class_name .'"]' );
+        
+        $description = [];
+        
+        if( $class_node->item(0) != null ) {
+            
+            if ( $class_node->item(0)->hasChildNodes() ) {
+
+                    $childs = $class_node->item(0)->childNodes;
+
+                    foreach( $childs as $item ) {
+
+                        if( is_a( $item, "DOMElement") ) { 
+
+                            $array_item = [];
+
+                            $array_item[ 'name' ] = $item->getAttribute( 'name' );
+                            $array_item[ 'type' ] = $item->getAttribute( 'type' );
+
+
+                            $description[] = $array_item;
+
+                        }
+
+                    }
+
+            }
         }
         
         return $description;

@@ -18,7 +18,6 @@ class HostedServiceInvocationTask extends Runnable
     
     private $sdk_loader; 
     private $rsi;
-
     
     public function __construct( $rsi ) {
 
@@ -43,28 +42,28 @@ class HostedServiceInvocationTask extends Runnable
             $this->initSdk();
             $this->includeServiceClass();
             
-            $hosted_mapper = new HostedMapper();
-            
+            $instance_class_name = $this->rsi->getClassName();
             $arguments = $this->rsi->getArguments();
             
-            $hosted_mapper->prepareArguments( 
-                                                $arguments, 
+            $hosted_mapper = new HostedMapper(  
                                                 PathBuilder::getHostedService( $this->rsi->getAppVersionId(), $this->rsi->getRelativePath() ),
-                                                $this->rsi->getAppVersionId(),
+                                                $this->rsi->getAppVersionId()
+                                             );
+            
+            $hosted_mapper->prepareArguments( //$instance_class_name, $this->rsi->getMethod(), $arguments );
+                                                $arguments,
                                                 $this->rsi->getMethod()    
                                             );
             
             if( $hosted_mapper->isError() ) {
                 
-                Log::writeError( $hosted_mapper->getError() );
+                Log::writeError( $hosted_mapper->getError()['msg'] );
                 return ResponderProcessor::sendResult( $this->rsi->getId(), $hosted_mapper->getError() );
                 
             }
 
             $reflection_method = new ReflectionMethod( $this->rsi->getClassName(), $this->rsi->getMethod() );
 
-            $instance_class_name = $this->rsi->getClassName();
-            
             $result = $reflection_method->invokeArgs( new $instance_class_name(), $arguments );
             
             $hosted_mapper->prepareResult( $result );

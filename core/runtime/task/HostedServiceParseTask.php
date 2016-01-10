@@ -34,11 +34,13 @@ class HostedServiceParseTask extends Runnable
             return;
             
         }
-
+        
         try{       
             
+            $path_to_hosted = PathBuilder::getHostedService( $this->rai->getAppVersionId(), $this->rai->getRelativePath() );
+            
             $hosted_parser = new HostedServiceParser( 
-                                                        PathBuilder::getHostedService( $this->rai->getAppVersionId(), $this->rai->getRelativePath() ), 
+                                                        $path_to_hosted, 
                                                         $this->rai->getId() 
                                                     );
             
@@ -46,7 +48,7 @@ class HostedServiceParseTask extends Runnable
             
             if( $hosted_parser->isError() ) {
                 
-                Log::writeError( $hosted_parser->getError() );
+                Log::writeError( $hosted_parser->getError()['msg'] );
                 return ResponderProcessor::sendResult( $this->rai->getId(), $hosted_parser->getError() ); 
                 
             }
@@ -54,26 +56,28 @@ class HostedServiceParseTask extends Runnable
             
             $runtime = [
                         
-                        'path'  =>  "TODO",
-                        'endpointURL' => Config::$CORE['hosted_service']['endpoint_url'],
-                        'serverRootURL' => Config::$CORE['hosted_service']['server_root_url'],
-                        'serverPort'    =>  Config::$CORE['hosted_service']['server_port'],
-                        'serverName'    =>  Config::$CORE['hosted_service']['server_name'],
-                        'codeFormatType'    =>  Config::$CORE['hosted_service']['code_format_type'], 
-                        "generationMode"    =>  Config::$CORE['hosted_service']['generation_mode'], 
-                        'randomUUID'    =>  "TODO",
+                            'path'           => $path_to_hosted,
+                            'endpointURL'    => Config::$CORE['hosted_service']['endpoint_url'],
+                            'serverRootURL'  => Config::$CORE['hosted_service']['server_root_url'],
+                            'serverPort'     => Config::$CORE['hosted_service']['server_port'],
+                            'serverName'     => Config::$CORE['hosted_service']['server_name'],
+                            'codeFormatType' => Config::$CORE['hosted_service']['code_format_type'], 
+                            "generationMode" => Config::$CORE['hosted_service']['generation_mode'], 
+                            'randomUUID'     => mt_rand( 100000000, PHP_INT_MAX ),
                 
-            ];
+                        ];
             
             $xml_manager = new XmlManager();
             
             $invocation_result = new InvocationResult();
             $invocation_result->setArguments( ["xml" => $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime ) ] );
             
+            $xml = $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime );
+            file_put_contents("../repo/e3bd3a54-9a07-6160-ff70-a824a9610800/servercode/services/E3BD3A54-9A07-6160-FF70-A824A9610800.xml", $xml);
+            echo $xml; return;
+            
             ResponderProcessor::sendResult( $this->rai->getId(), $invocation_result );
             
-            //echo $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime );
-                
         } catch( Exception $e ) { 
             
             Log::writeError( $e->getMessage() );

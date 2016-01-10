@@ -8,6 +8,7 @@
                 'publish_code'              =>      '/servercode/publishcode',
     
     
+    
                 // interface class name for hosted service
                 "hosted_interface_name"     =>      "IBackendlessService",
     
@@ -44,6 +45,9 @@
                                         'server_name'   =>  "localhost",
                                         'code_format_type'  =>  "11", 
                                         "generation_mode"    =>  "FULL", 
+                    
+                                        "service_arg_mapping" => 'serviceArgMapping',
+                                        "data_model_properties" =>'dataModelProperties',
                     
                                     ]
     

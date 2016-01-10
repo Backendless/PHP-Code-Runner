@@ -2,6 +2,8 @@
 namespace backendless\core\parser;
 
 use backendless\core\processor\ResponderProcessor;
+use backendless\core\parser\typeparser\DefaultTypeParser;
+use backendless\core\util\TypeManager;
 use backendless\core\Config;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
@@ -13,10 +15,10 @@ use ReflectionMethod;
 use RegexIterator;
 
 
-
 class HostedServiceParser {
 
     protected $base_interface_name;
+    protected $is_exist_interface;
     
     protected $interface_implementation;
     protected $interface_implementation_info;
@@ -29,11 +31,10 @@ class HostedServiceParser {
     
     protected $path = null;
     protected $rai_id;
-
-    protected $is_exist_interface;
+   
+    protected $type_parser;
     
-
-    public function __construct( $path , $rai_id) {
+    public function __construct( $path = null , $rai_id = null ) {
         
         $this->base_interface_name = Config::$CORE["hosted_interface_name"];
         $this->interface_implementation_info = null;
@@ -46,12 +47,15 @@ class HostedServiceParser {
         $this->path = $path;
         $this->rai_id = $rai_id;
         
+        $this->type_parser = new DefaultTypeParser();
+        
     }
     
     public function parseFolderWithCustomCode( ) {
         
         $this->scanDirectory();
         $this->scanCode();
+        $this->dataTypeConvertation();
         
     }
     
@@ -60,14 +64,12 @@ class HostedServiceParser {
         $skip_folders = [ 'lib' ]; // lib folder can contain libraries which needed user
                 
         $files_iterator = new RecursiveIteratorIterator(
-                                                        new RecursiveCallbackFilterIterator(
-                                                            new RecursiveDirectoryIterator(
-                                                                $this->path
-                                                            ),
-                                                            function ( $fileInfo, $key, $iterator ) use ( $skip_folders ) {
-                                                                        return $fileInfo->isFile() || !in_array( $fileInfo->getBaseName(), $skip_folders );
+                                                         new RecursiveCallbackFilterIterator(
+                                                            new RecursiveDirectoryIterator( $this->path ),
+                                                            function ( $file_info, $key, $iterator ) use ( $skip_folders ) {
+                                                                return $file_info->isFile() || !in_array( $file_info->getBaseName(), $skip_folders );
                                                             }
-                                                        )
+                                                         )
                                                        );
                                                         
         $php_files = new RegexIterator( $files_iterator, '/\.php$/');
@@ -78,7 +80,6 @@ class HostedServiceParser {
             
         }
         
-   
         if( count( $this->path_to_classes) <= 0 ) {
             
             $this->parsing_error["code"] = 1;
@@ -135,7 +136,6 @@ class HostedServiceParser {
         $matches_class = '';
         
         //check if exist any class in file
-        
         if ( preg_match( '/^(.*?)?class(\s)+(.*?)(\s)?(\n*?)?(\s*){$/m', $code, $matches_class ) ) {
             
             $class_description = [];
@@ -206,71 +206,28 @@ class HostedServiceParser {
         $reflector = new ReflectionClass( $full_class_name );
         
         $methods = $reflector->getMethods( ReflectionMethod::IS_PUBLIC ); //only public methods
+
+        $class_description['fullname'] = implode( '\\', [ $class_description['namespace'], $class_description['name'] ] );
+        $class_description['endpointURL'] = Config::$CORE['hosted_service']['endpoint_url'];
         
-        $reflection_property = $reflector->getProperty('_mapping');
-        $reflection_property->setAccessible( true );
-        $mapping_rules = $reflection_property->getValue( new $full_class_name() );
-        
-        $methods_description = [ 'class_description' => $class_description, 'methods' =>[] ];
-        $method_info = [];
-        $args_info = [];
+        $interface_implementation = [ 'class_description' => $class_description, 'methods' =>[] ];
         
         try {
         
             foreach ( $methods as $method ) {
 
-                $method_info['name'] = $method->getName();
-                $params = $method->getParameters();
-                $info = [];
+                $interface_implementation['methods'][] = $this->type_parser->parseServiceMethod( $method );
 
-                foreach ( $params as $param ) {
+            }
 
-                    $info['name'] = $param->getName();
+            if( $this->type_parser->isError() ) {
 
-                    if( $param->getClass() !== null ) {
-
-                        $info['type'] = $param->getClass()->name; // set type of class from code definition
-                        $this->addClassToUsedList( $param->getClass()->name );
-
-                    } else {
-
-                        if( isset( $mapping_rules[ $method->getName() ] ) ) {  // set type of class from mapping definition
-
-                            if( isset( $mapping_rules[ $method->getName() ][ $param->getName() ] ) ) {
-
-                                $info['type'] = $mapping_rules[ $method->getName() ][ $param->getName() ];  
-
-                                $this->addClassToUsedList( $mapping_rules[ $method->getName() ][ $param->getName() ] );
-
-                            } else {
-
-                                $info['type'] = '';
-
-                            }
-
-                        } else {
-
-                            $info['type'] = '';
-
-                        }
-
-                    }
-
-                    $args_info[] = $info;
-
-                    $info = [];
-
-                }
-
-                $method_info['arg'] = $args_info; 
-                $args_info = [];
-
-                $methods_description['methods'][] = $method_info;
-                unset( $method_info );
+                ResponderProcessor::sendResult( $this->rai_id, $this->type_parser->getError() );
+                throw new Exception( $this->type_parser->getError()["msg"] );
 
             }
         
-        } catch ( Exception $e ) {
+        } catch ( Exception $e ) { 
             
             $error = [];
             
@@ -287,32 +244,21 @@ class HostedServiceParser {
             }
                         
             ResponderProcessor::sendResult( $this->rai_id, $error );
-                
             throw new Exception( $error["msg"] );
         
         }
         
-        $this->interface_implementation = $methods_description;
+        $this->interface_implementation = $interface_implementation;
         
     }
 
-    private function addClassToUsedList( $class_full_name ) {
-        
-        //TODO; // Also add related classes of relation if relation mapping will be approved
-        
-        if( ! in_array( $class_full_name, $this->used_classes) ) { // fix duplicate classes
-            
-            $this->used_classes[ ] =  $class_full_name;
-            
-        }
-       
-    }
-    
     private function deleteUnusedClasses() {
-        
+
+        $used_types = $this->type_parser->getListOfUsedTypes();
+
         foreach ( $this->classes_holder as $key => $class_definition ) {
             
-            if( !in_array( $class_definition['fullname'], $this->used_classes ) ) {
+            if( !in_array( $class_definition['fullname'], $used_types ) ) {
                 
                 unset( $this->classes_holder[ $key ] );
             }
@@ -334,17 +280,16 @@ class HostedServiceParser {
         }
         
         $props = ( new ReflectionClass( $full_class_name ) )->getProperties();
-
-        $props_array = [];
-        
-        foreach ( $props as $prop ) {
-            
-            $props_array[]['name'] = $prop->getName();
-
-        } 
         
         $class_description['fullname'] = trim( $full_class_name, "\\" );
-        $class_description['field'] =   $props_array;
+        $class_description['field'] = $this->type_parser->parseDataModel( ( new ReflectionClass( $full_class_name ) )->getProperties() );
+        
+        if( $this->type_parser->isError() ) {
+
+                ResponderProcessor::sendResult( $this->rai_id, $this->type_parser->getError() );
+                throw new Exception( $this->type_parser->getError()["msg"] );
+
+        }
         
         $this->classes_holder[] = $class_description;
         
@@ -355,7 +300,7 @@ class HostedServiceParser {
         return ["datatype" => $this->classes_holder, "service" => $this->interface_implementation ];
         
     }
-   
+    
 //  private function parseAnnotation( ){
 //        
 //  }
@@ -378,4 +323,45 @@ class HostedServiceParser {
         
     }
     
+    private function dataTypeConvertation() {
+        
+        $type_manager = new TypeManager();
+        
+        foreach ( $this->interface_implementation['methods'] as $method_index => $val ) {
+            
+            foreach ( $this->interface_implementation['methods'][$method_index]['arg'] as $arg_index=>$arg_val ) {
+                
+                $type_manager->prepareTypesForXML( $this->interface_implementation['methods'][$method_index]['arg'][$arg_index] );
+                
+            }
+            
+            if( isset($this->interface_implementation['methods'][$method_index]['return_type'] ) ) {
+                
+                $type_descriptiopn = [ 'type' => $this->interface_implementation['methods'][$method_index]['return_type'] ];
+
+                $type_manager->prepareTypesForXML( $type_descriptiopn );
+
+                $this->interface_implementation['methods'][$method_index]['return_type'] = $type_descriptiopn;
+            }
+            
+        }
+        
+
+        foreach ( $this->classes_holder as $index=>$val ) {
+
+            if( isset( $val['field'] ) ) {
+                
+                foreach ( $this->classes_holder[$index]['field'] as $prop_index=>$prop_val ) {
+
+                    $type_manager->prepareTypesForXML( $this->classes_holder[$index]['field'][$prop_index] );
+
+                }
+                
+            }
+            
+        }        
+        
+    }
+    
 }
+
