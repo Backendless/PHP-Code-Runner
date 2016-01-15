@@ -4,7 +4,7 @@
                 'register_model_link'       =>      '/servercode/registermodel',
                 'register_runner_link'      =>      '/servercode/registerRunner',
                 'unregister_runner_link'    =>      '/servercode/unregisterRunner',
-                'external_host'             =>      '/servercode/externalhost',
+                'external_host'             =>      '/servercode/externalhosts',
                 'publish_code'              =>      '/servercode/publishcode',
     
     
