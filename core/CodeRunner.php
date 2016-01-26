@@ -32,8 +32,6 @@ class CodeRunner
             pcntl_signal(SIGINT, array(&$this, 'terminateRunner'));     // CTRL+C
             pcntl_signal(SIGQUIT, array(&$this, 'terminateRunner'));    // CTRL+\(Y)
             
-            var_dump(1);
-            
         }
         
     }
