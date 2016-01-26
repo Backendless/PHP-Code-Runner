@@ -26,7 +26,7 @@ class CodeRunner
         //registered method called when app shutdown
         register_shutdown_function( array($this, 'shutdown') );
         
-        if( Config::$CORE['os_type'] != "WIN" && function_exists("pcntl_signal") ) { // PCNTL extension not supported on Windows
+        if( Config::$CORE['os_type'] != "WIN" && !function_exists("pcntl_signal") ) { // PCNTL extension not supported on Windows
             
             //register events when catch app termination and run shutdown method 
             pcntl_signal(SIGINT, array(&$this, 'terminateRunner'));     // CTRL+C
@@ -34,8 +34,7 @@ class CodeRunner
             
         } else {
             
-            $extension = ( Config::$CORE['os_type'] == "WIN" ) ? "bat" : "sh";
-            Log::writeInfo("To terminate CodeRunner, use the 'terminate' script 'StopCodeRunner." . $extension . "'", $target  = "console" );
+            Log::writeInfo( "To terminate CodeRunner, enter the 'terminate' command", $target  = "console" );
             
         }
         
@@ -86,6 +85,14 @@ class CodeRunner
                 
                 $this->message_processor->run();
                 $this->responder_processor->localRun();
+                
+                $command = trim( fgets(STDIN) );
+                
+                if( $command == 'terminate' ) {
+                    
+                    $this->terminateRunner( $signal = 'SIGINT' );
+                    
+                }
                 
             }
             
