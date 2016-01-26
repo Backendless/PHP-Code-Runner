@@ -26,7 +26,7 @@ class CodeRunner
         //registered method called when app shutdown
         register_shutdown_function( array($this, 'shutdown') );
         
-        if( Config::$CORE['os_type'] != "WIN") { // PCNTL extension not supported on Windows
+        if( Config::$CORE['os_type'] != "WIN" && function_exists("pcntl_signal") ) { // PCNTL extension not supported on Windows
 
             //register events when catch app termination and run shutdown method 
             pcntl_signal(SIGINT, array(&$this, 'terminateRunner'));     // CTRL+C
@@ -180,15 +180,10 @@ class CodeRunner
       
     public function deployModel() {
         
-        if( GlobalState::$STATE != "BUILD" ) {
-            
-          return Log::writeWarn( "You should build EventModel first!" );
-          
-        }
-        
         if( $this->event_handlers_model == null || $this->event_handlers_model->getCountTimers()== 0 && $this->event_handlers_model->getCountEventHandlers() == 0 ) {
 
-            return Log::writeWarn( "There are no any code, which can be deployed to Backendless..." );
+            Log::writeWarn( "There are no any code, which can be deployed to Backendless..." );
+            exit();
             
         }
         
