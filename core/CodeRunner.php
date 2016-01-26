@@ -139,7 +139,7 @@ class CodeRunner
     public function terminateRunner( $signal ) {
 
         // hook for termination of script, if script terminated will call method shutdown.
-        Log::writeInfo("Terminating...", $target = "console" );
+        Log::writeInfo("Cleaning up and disconnecting...", $target = "console" );
         exit();
         
     }
