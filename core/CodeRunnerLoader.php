@@ -53,7 +53,7 @@ class  CodeRunnerLoader
         Log::write("Copyright(C) " . date("Y", time()) . " Backendless Corp. All rights reserved.", $target = 'console');
         Log::write( "Version: " . Config::$VERSION . " \n", $target = 'console' );
         
-        Log::writeInfo( "CodeRunner session is running for 2 hour and will be terminated on: " 
+        Log::writeInfo( "CodeRunner session is running for 2 hours and will be terminated on: " 
                         . date( "H:i:s", strtotime('+2 hours')) . " ( for you timezone: '" . date_default_timezone_get() . " ')", $target = 'console' );
         
     }

@@ -198,7 +198,7 @@ class CodeRunner
         
         if( $this->event_handlers_model == null || $this->event_handlers_model->getCountTimers()== 0 && $this->event_handlers_model->getCountEventHandlers() == 0 ) {
 
-            Log::writeWarn( "There are no any code, which can be deployed to Backendless..." );
+            Log::writeWarn( "There is no code to deploy to Backendless..." );
             exit();
             
         }
