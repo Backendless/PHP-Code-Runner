@@ -86,7 +86,11 @@ class CodeRunner
                 $this->message_processor->run();
                 $this->responder_processor->localRun();
                 
+                stream_set_blocking ( STDIN , false );
+                
                 $command = trim( fgets(STDIN) );
+                
+                stream_set_blocking ( STDIN , true );
                 
                 if( $command == 'terminate' ) {
                     

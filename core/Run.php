@@ -4,7 +4,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', true);
 
 declare(ticks = 1);
-stream_set_blocking ( STDIN , false );
 
 use backendless\core\lib\Autoload;
 use backendless\core\CodeRunnerLoader;
