@@ -53,7 +53,7 @@ class  CodeRunnerLoader
         Log::write("Copyright(C) " . date("Y", time()) . " Backendless Corp. All rights reserved.", $target = 'console');
         Log::write( "Version: " . Config::$VERSION . " \n", $target = 'console' );
         
-        Log::writeInfo( "CodeRunner session is running for 2 hour and will be terminated on: " 
+        Log::writeInfo( "CodeRunner session is running for 2 hours and will be terminated on: " 
                         . date( "H:i:s", strtotime('+2 hours')) . " ( for you timezone: '" . date_default_timezone_get() . " ')", $target = 'console' );
         
     }
@@ -115,104 +115,138 @@ class  CodeRunnerLoader
     
     private static function checkForInputKeys( $argc, $argv ) {
 
-        if( $argc <=1 ) {
-            return false;
+        if( $argc <=1 ) { return false; }
+
+        if( $argc != 4 && $argc !=2 && $argc !=5 ) {
+            
+            return Log::writeError("Invalid script arguments count", $target = 'console');
+            
         }
         
-        if( $argv[1] == "deploy" ) {
-          Config::$AUTO_PUBLISH = true;
+        if( $argc == 2 ) {
+            
+             if( $argv[1] == "deploy" ) {
+            
+                 Config::$AUTO_PUBLISH = true;
+                 return;
+                 
+             }
+            
+        }
+        
+        $argv_position = 0;
+        
+        if( $argc == 5) {
+
+            if( $argv[1] == "deploy" ) {
+            
+                Config::$AUTO_PUBLISH = true;
+                $argv_position = 1;
+          
+            } else {
+                
+                return Log::writeError("Invalid script arguments count", $target = 'console');
+                
+            }
+            
         }
 
-        if( $argc == 4 ) {
-            Config::$APPLICATION_ID = $argv[2];
-            Config::$SECRET_KEY     = $argv[3];
+        if( $argc == 4 || $argc == 5 ) {
             
+            Config::$APPLICATION_ID = $argv[ $argv_position+1 ];
+            Config::$SECRET_KEY     = $argv[ $argv_position+2 ];
+            Config::$APP_VERSION    = $argv[ $argv_position+3 ];
+            Config::$need_save_keys = true;
+
             // chek if not format for cloud run
             $keys = [];
             $keys[] = explode( '=', $argv[1])[0];
             $keys[] = explode( '=', $argv[2])[0];
             $keys[] = explode( '=', $argv[3])[0];
-            
+
             foreach ( self::$keys_list as $key ) {
-                 
+
                 if( in_array($key, $keys) ) {
-                    
-                    Log::writeError("Run in LOCAL mode don't need set keys " . implode(',', self::$keys_list), $target = 'all');
+
+                    Log::writeError("Run in LOCAL mode don't need set keys " . implode( ',', self::$keys_list ), $target = 'all');
                     exit();
-                    
+
                 }
             }
              
         }
         
-        if( $argc == 3 ) {
-            
-          Config::$APPLICATION_ID   = $argv[1];
-          Config::$SECRET_KEY       = $argv[2];
-          
-        }
-
-        Config::saveKeys();
-        
       }
       
     private static function checkDefaultKeys() {
           
-        if( (Config::$APPLICATION_ID === null || Config::$APPLICATION_ID == '' ) || ( Config::$SECRET_KEY === null || Config::$SECRET_KEY == '' ) ) {
+        if(    !preg_match( "/" . self::$VALID_PATTERN . "/", Config::$APPLICATION_ID, $matches ) 
+            || !preg_match( "/" . self::$VALID_PATTERN . "/", Config::$SECRET_KEY, $matches )
+            || Config::$APP_VERSION == null ) {
             
             echo "\n";
-            Log::writeWarn("ApplicationID or SecretKey is not set.", $target = 'console');
-            Log::writeInfo("Try run again with specified ApplicationID and SecretKey as script arguments "
+            Log::writeWarn("ApplicationID SecretKey application version is not set one or all values.", $target = 'console');
+            Log::writeInfo("Try run again with specified ApplicationID SecretKey and application version as script arguments "
                            . "or edit it in config file [root_folder]" .DS."config.php", $target = 'console' );
             
-            Log::writeInfo("NOTE: Run script pattern <ScriptName> [ApplicationID] [SecretKey] \n", $target = 'console' );
+            Log::writeInfo("NOTE: Run script pattern <ScriptName> [ApplicationID] [SecretKey] [AppVersion]", $target = 'console' );
             
-            if( Config::$APPLICATION_ID === null || Config::$APPLICATION_ID == '' ) {
+            if( !preg_match( "/" . self::$VALID_PATTERN . "/", Config::$APPLICATION_ID, $matches ) ) {
                 
-                Log::writeInfo("Please enter application ID and press [Enter]:", $target = 'console' );
+                echo "\n";
+                Log::writeWarn("Don't set or wrong application ID value.", $target = 'console' );
+                Log::writeInfo("Please enter application ID and press [Enter]:!<new>", $target = 'console' );
             
-                Config::$APPLICATION_ID = trim(fgets(STDIN));
+                Config::$APPLICATION_ID = trim( fgets( STDIN ) );
                 
-            }
-            
-            if(  Config::$SECRET_KEY === null || Config::$SECRET_KEY == ''  ) {
-            
-                Log::writeInfo("Please enter CodeRunner secret key and press [Enter]:", $target = 'console' );
-            
-                Config::$SECRET_KEY = trim(fgets(STDIN));
-            }
-                
-        }
-        
-        if( !preg_match( "/" . self::$VALID_PATTERN . "/", Config::$APPLICATION_ID, $matches ) ) {
-            
-            echo "\n";
-            Log::writeWarn("ApplicationID is invalid.", $target = 'console');
-            Log::writeInfo("Try again run script with specified ApplicationID and SecretKey as script arguments "
-                           . "or edit it in config file [root_folder]" .DS."config.php.", $target = 'console');
-            Log::writeInfo("NOTE: Run script pattern <ScriptName> [ApplicationID] [SecretKey] \n", $target = 'console' );
-            
-            Log::writeInfo("Please re enter application ID and press [Enter]:", $target = 'console' );
-            
-            Config::$APPLICATION_ID = trim(fgets(STDIN));
-                
-        }
-        
-       if( !preg_match( "/" . self::$VALID_PATTERN . "/", Config::$SECRET_KEY, $matches ) ) {
-           
-            echo "\n";
-            Log::writeWarn("SecretKey is invalid.", $target = 'console');
-            Log::writeInfo("Try again run script with specified ApplicationID and SecretKey as script arguments "
-                           . "or edit it in config file [root_folder]" .DS."config.php.", $target = 'console');
-            Log::writeInfo("NOTE: Run script pattern <ScriptName> [ApplicationID] [SecretKey] \n", $target = 'console' );
-            
-            Log::writeInfo("Please re enter CodeRunner secret key and press [Enter]:", $target = 'console' );
-            
-            Config::$SECRET_KEY = trim(fgets(STDIN));
+                while( !preg_match( "/" . self::$VALID_PATTERN . "/", Config::$APPLICATION_ID, $matches ) ) {
 
+                    Log::writeError( "The value is invalid, please try again:!<new>", $target = 'console' );
+
+                    Config::$APPLICATION_ID = trim( fgets( STDIN ) );
+
+                }
+                
+            }
+            
+            if(  !preg_match( "/" . self::$VALID_PATTERN . "/", Config::$SECRET_KEY, $matches ) ) {
+            
+                echo "\n";
+                Log::writeWarn("Don't set or wrong CodeRunner secret key value.", $target = 'console' );
+                Log::writeInfo("Please enter CodeRunner secret key and press [Enter]:!<new>", $target = 'console' );
+            
+                Config::$SECRET_KEY = trim( fgets( STDIN ) );
+                
+                while( !preg_match( "/" . self::$VALID_PATTERN . "/", Config::$SECRET_KEY, $matches ) ) {
+                    
+                    Log::writeError( "The value is invalid, please try again:!<new>", $target = 'console' );
+            
+                    Config::$SECRET_KEY = trim( fgets( STDIN ) );
+
+                }
+                
+            }
+            
+            if( Config::$APP_VERSION == null ) {
+                
+                echo "\n";
+                Log::writeWarn("Don't set or wrong application version value.", $target = 'console' );
+                Log::writeInfo("Please enter application version and press [Enter]:!<new>", $target = 'console' );
+            
+                Config::$APP_VERSION = trim( fgets( STDIN ) );
+                
+                while( Config::$APP_VERSION == null ) {
+                    
+                    Log::writeError( "The value is invalid, please try again:!<new>", $target = 'console' );
+                    Config::$APP_VERSION = trim( fgets( STDIN ) );
+                    
+                }
+                
+            }
+            
+            Config::$need_save_keys = true;
+                
         }
-        
-        Config::saveKeys();
 
     }
       

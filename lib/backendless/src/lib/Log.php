@@ -1,30 +1,22 @@
 <?php
-namespace backendless\core\lib;
-
+namespace backendless\lib;
 
 class Log {
     
-    protected static $app_log_file = "application.log";
+    protected static $app_log_file = "sdk.log";
     protected static $app_log_dir = "log";
-    protected static $is_colored_glob = true;
     
     protected static $log_path;
     
     protected static $colors = [ 'blue' => '0;34', 'yellow' => '1;33', 'red' => '0;31' ];
     
-    public static function init( $os_type = '' ) {
+    public static function init( ) {
         
-        self::$log_path =  BP . DS . self::$app_log_dir ;
+        self::$log_path =  dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . self::$app_log_dir;
         
         if( !file_exists( self::$log_path ) ) {
             
             mkdir( self::$log_path );
-            
-        }
-        
-        if( $os_type == "WIN") {
-            
-            self::$is_colored_glob = false;
             
         }
         
@@ -62,7 +54,7 @@ class Log {
     
     protected static function doWrite( $msg, $target, $msg_prefix, $colored, $color ) {
         
-        if( $colored && self::$is_colored_glob ) {
+        if( $colored ) {
             
             $msg_colored_prefix = self::addColor($msg_prefix, $color );
             
@@ -115,18 +107,7 @@ class Log {
     
     protected static function writeToConsole( $msg ) {
         
-        $new_line = substr( $msg, -6);
-        
-        if( $new_line != '!<new>') {
-            
-            echo $msg . "\n";
-            
-        }else {
-            
-            echo substr( $msg, 0, -6);
-            
-        }
-        
+        echo $msg . "\n";
         
     }
 
@@ -144,12 +125,6 @@ class Log {
         
     }
     
-    public static function writeToLogFile( $msg ) {
-        
-        $log_file_path = self::$log_path . DS . self::$app_log_file;
-        
-        file_put_contents( $log_file_path, $msg . "\n", FILE_APPEND );
-        
-    }
-    
 }
+
+

@@ -29,11 +29,15 @@ class CodeRunner
         //registered method called when app shutdown
         register_shutdown_function( array($this, 'shutdown') );
         
-        if( Config::$CORE['os_type'] != "WIN") { // PCNTL extension not supported on Windows
-
+        if( Config::$CORE['os_type'] != "WIN" && function_exists("pcntl_signal") ) { // PCNTL extension not supported on Windows
+            
             //register events when catch app termination and run shutdown method 
             pcntl_signal(SIGINT, array(&$this, 'terminateRunner'));     // CTRL+C
             pcntl_signal(SIGQUIT, array(&$this, 'terminateRunner'));    // CTRL+\(Y)
+            
+        } else {
+            
+            Log::writeInfo( "To terminate CodeRunner, enter the 'terminate' command", $target  = "console" );
             
         }
         
@@ -79,6 +83,18 @@ class CodeRunner
                 $this->message_processor->run();
                 $this->responder_processor->localRun();
                 
+                stream_set_blocking ( STDIN , false );
+                
+                $command = trim( fgets(STDIN) );
+                
+                stream_set_blocking ( STDIN , true );
+                
+                if( $command == 'terminate' ) {
+                    
+                    $this->terminateRunner( $signal = 'SIGINT' );
+                    
+                }
+                
             }
             
         } else {
@@ -91,7 +107,7 @@ class CodeRunner
     }
     
     public function shutdown() {
-        
+
         try {
             
             if( GlobalState::$TYPE == 'CLOUD' ) {
@@ -123,9 +139,9 @@ class CodeRunner
     }
     
     public function terminateRunner( $signal ) {
-        
+
         // hook for termination of script, if script terminated will call method shutdown.
-        
+        Log::writeInfo("Cleaning up and disconnecting...", $target = "console" );
         exit();
         
     }
@@ -155,17 +171,15 @@ class CodeRunner
             CodeRunnerUtil::getInstance()->registerCodeRunner();
             GlobalState::$STATE = 'REGISTERED';
             Log::writeInfo("Runner successfully registered.");
+            Config::saveKeys();
         
-        }
-        catch( Exception $e ) {
-          
-          //Log::writeError("Runner registration failed. Please check 'application_id', 'application_secretKey' and 'application_version' in 'config.php' file.", $target = 'console');  
+        } catch( Exception $e ) {
             
-          Log::writeError("Runner registration failed.", $target = 'console');
-          Log::writeError( $e->getMessage()  , $target = 'file' );
-          
-          self::Stop();
-          exit();
+            Log::writeError("Runner registration failed.", $target = 'console');
+            Log::writeError( $e->getMessage()  , $target = 'file' );
+
+            self::Stop();
+            exit();
           
         }
         
@@ -194,9 +208,10 @@ class CodeRunner
             
         }
         
-        if( $is_empty_event_handlers_model == true && $is_empty_hosted_model == true ) {
-        
-            return Log::writeWarn( "There are no any code, which can be deployed to Backendless..." );
+        if( $this->event_handlers_model == null || $this->event_handlers_model->getCountTimers()== 0 && $this->event_handlers_model->getCountEventHandlers() == 0 ) {
+
+            Log::writeWarn( "There is no code to deploy to Backendless..." );
+            exit();
             
         }
         

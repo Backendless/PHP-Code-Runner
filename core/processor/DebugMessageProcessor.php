@@ -23,7 +23,7 @@ class DebugMessageProcessor extends MessageProcessor
                 
             $predis = self::$redis_manager->getRedis();
 
-            $result = $predis->blpop( [$this->getChannel()], 0 );
+            $result = $predis->blpop( [$this->getChannel()], 1 );
 
             if( $result == null ) {
 
