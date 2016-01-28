@@ -1,27 +1,20 @@
 <?php
 namespace backendless\core\commons\model;
 
-use backendless\core\commons\model\EventHandler;
-use Exception;
+use backendless\core\Config;
+use backendless\core\util\XmlManager;
 
-class EventHandlersModel
+class HostedModel
 {
     private $application_id;
     private $app_version_id;
     
-    private $handlers;
-    
-    private $count_event_handlers;
-    private $count_timers; 
+    private $datatype;
+    private $service;
 
     public function __construct() {
         
-        $this->handlers = [];
-        $this->count_event_handlers = 0;
-        $this->count_timers = 0;
-        
     }
-    
 
     public function getApplicationId() {
         
@@ -46,131 +39,44 @@ class EventHandlersModel
         $this->app_version_id = $app_version_id;
         
     }
-
-    public function getHandlers() {
-        
-        return $this->handlers;
-      
-    }
-
-    public function setHandlers( $handlers ) {
-        
-        $this->handlers = $handlers;
-        
-    }
-
-    public function getCountEventHandlers() {
-        
-        return $this->count_event_handlers;
-      
-    }
     
-    public function getCountTimers() {
+    public function setData( $parsed_data ) {
         
-        return $this->count_timers;
+        $this->service = $parsed_data[ "service" ];
+        $this->datatype = $parsed_data[ "datatype" ];
         
     }
     
-    public function addHandler( $handler ) {
+    public function getCountOfEvents() {
         
-        $this->handlers[] = $handler;
-
-        if( $handler->isTimer() ) {
-            
-            $this->count_timers++;
-            
-        }else{
-            
-            $this->count_event_handlers++;
-            
-        }
+        return count( $this->service["methods"] );
         
     }
-
-    public function getEventHandler( $event_id, $target ) {
+    
+    public function getXML() {
         
-        foreach( $this->handlers as $key => $handler ) {
-          
-            if( $handler->getId() != $event_id ) {
-                continue;
-            }
+        $runtime = [
 
-            if( $handler->getTarget() !== $target ) {
-                continue;
-            }
+                        //'path'           => $path_to_hosted,
+                        'endpointURL'    => Config::$CORE['hosted_service']['endpoint_url'],
+                        'serverRootURL'  => Config::$CORE['hosted_service']['server_root_url'],
+                        'serverPort'     => Config::$CORE['hosted_service']['server_port'],
+                        'serverName'     => Config::$CORE['hosted_service']['server_name'],
+                        'codeFormatType' => Config::$CORE['hosted_service']['code_format_type'], 
+                        "generationMode" => Config::$CORE['hosted_service']['generation_mode'], 
+                        'randomUUID'     => mt_rand( 100000000, PHP_INT_MAX ),
 
-            return $handler;
-
-        }
-
-        return null;
-      
+                   ];
+            
+        $xml_manager = new XmlManager();
+        return $xml_manager->buildXml( [ "service" => $this->service, "datatype"  => $this->datatype ], $runtime );
+        
     }
-
+    
     public function __toString() {
 
-        return "EventModel{ " . "timers=" . $this->count_timers . ", eventHandlers=" . $this->count_event_handlers . ' }';
-        
-    }
-    
-    
-    public function loadFromJson( $path ) {
-
-        if( file_exists( $path ) ) {
-            
-            $data_array = json_decode( file_get_contents($path), true );
-            
-            $this->application_id = $data_array['applicationId'];
-            $this->app_version_id = $data_array['appVersionId'];
-            
-            
-            foreach ( $data_array["handlers"] as  $handler_item ) {
-                
-                $handler = new EventHandler();
-                $handler->setId($handler_item['id']);
-                $handler->setAsync($handler_item['async']);
-                $handler->setTarget($handler_item['target']);
-                $handler->setTimer($handler_item['timer']);
-                $handler->setProvider($handler_item['provider']);
-                
-                $this->addHandler( $handler );
-                
-            }
-            
-        } else {
-            
-            throw new Exception( "Event handler model json file absent in path: $path" );
-            
-        }
-        
-    }
-        
-    public function getJson( $pretty_print = false ) {
-        
-       
-        $data = [];
-        
-        $data["applicationId"] = $this->application_id;
-        $data["appVersionId"] = $this->app_version_id;
-        $data["handlers"] = [];
-        
-        foreach ( $this->handlers as $index => $handler) {
-            
-            $data["handlers"][$index] = $handler->getVars();
-            
-        }
-        
-        
-        if( $pretty_print ) {
-            
-            return json_encode( $data, JSON_PRETTY_PRINT );
-            
-        }
-        
-       return json_encode( $data );
+        return "HostedModel{ hosted service events=" . $this->getCountOfEvents() . ' }';
         
     }
           
 }
-
-

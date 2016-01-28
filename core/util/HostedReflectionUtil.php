@@ -1,8 +1,8 @@
 <?php
-namespace backendless\core\parser;
+namespace backendless\core\util;
 
-use backendless\core\processor\ResponderProcessor;
 use backendless\core\parser\typeparser\DefaultTypeParser;
+use backendless\core\commons\exception\CodeRunnerException;
 use backendless\core\util\TypeManager;
 use backendless\core\Config;
 use RecursiveIteratorIterator;
@@ -15,7 +15,7 @@ use ReflectionMethod;
 use RegexIterator;
 
 
-class HostedServiceParser {
+class HostedReflectionUtil {
 
     protected $base_interface_name;
     protected $is_exist_interface;
@@ -30,11 +30,11 @@ class HostedServiceParser {
     protected $used_classes;
     
     protected $path = null;
-    protected $rai_id;
+    //protected $rai_id;
    
     protected $type_parser;
     
-    public function __construct( $path = null , $rai_id = null ) {
+    public function __construct( $path = null /*, $rai_id = null*/ ) {
         
         $this->base_interface_name = Config::$CORE["hosted_interface_name"];
         $this->interface_implementation_info = null;
@@ -45,7 +45,7 @@ class HostedServiceParser {
         $this->used_classes = [];
 
         $this->path = $path;
-        $this->rai_id = $rai_id;
+        //$this->rai_id = $rai_id;
         
         $this->type_parser = new DefaultTypeParser();
         
@@ -176,6 +176,12 @@ class HostedServiceParser {
             
             if( preg_match( '/^.*implements(\s*)(.*?)(' . $this->base_interface_name . ')(.*)$/m', $matches_class[3], $matches_implementation) ) {
                
+                if( $this->is_exist_interface == true ) {
+
+                    throw new CodeRunnerException( "Multiple services has been found. Currently only one service per project is allowed. Please make sure there is only service in the project and try again." );
+                
+                }
+                
                 $this->is_exist_interface = true;
                 $this->interface_implementation_info = $class_description;
                 
@@ -222,7 +228,7 @@ class HostedServiceParser {
 
             if( $this->type_parser->isError() ) {
 
-                ResponderProcessor::sendResult( $this->rai_id, $this->type_parser->getError() );
+                //ResponderProcessor::sendResult( $this->rai_id, $this->type_parser->getError() );
                 throw new Exception( $this->type_parser->getError()["msg"] );
 
             }
@@ -243,7 +249,7 @@ class HostedServiceParser {
                 
             }
                         
-            ResponderProcessor::sendResult( $this->rai_id, $error );
+            //ResponderProcessor::sendResult( $this->rai_id, $error );
             throw new Exception( $error["msg"] );
         
         }
@@ -286,7 +292,7 @@ class HostedServiceParser {
         
         if( $this->type_parser->isError() ) {
 
-                ResponderProcessor::sendResult( $this->rai_id, $this->type_parser->getError() );
+                //ResponderProcessor::sendResult( $this->rai_id, $this->type_parser->getError() );
                 throw new Exception( $this->type_parser->getError()["msg"] );
 
         }
@@ -364,4 +370,3 @@ class HostedServiceParser {
     }
     
 }
-

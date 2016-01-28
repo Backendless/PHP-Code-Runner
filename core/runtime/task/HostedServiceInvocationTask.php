@@ -4,11 +4,13 @@ namespace backendless\core\runtime\task;
 use backendless\core\runtime\concurrent\Runnable;
 use backendless\core\processor\ResponderProcessor;
 use backendless\core\lib\Log;
-use backendless\core\util\ClassManager;
+use backendless\core\commons\InvocationResult;
+use backendless\core\GlobalState;
 use backendless\core\util\PathBuilder;
 use ReflectionMethod;
 use backendless\Backendless;
 use backendless\commons\InvocationContext;
+use backendless\core\commons\holder\HostedModelHolder;
 use backendless\core\util\HostedMapper;
 use Exception;
 
@@ -18,7 +20,8 @@ class HostedServiceInvocationTask extends Runnable
     
     private $sdk_loader; 
     private $rsi;
-    
+    private static $xml_model;
+
     public function __construct( $rsi ) {
 
         $this->rsi = $rsi;
@@ -37,38 +40,43 @@ class HostedServiceInvocationTask extends Runnable
             
         }
 
-        try{       
+        try{
+            
+            if( GlobalState::$TYPE == 'CLOUD') {
+            
+                $xml_path = realpath( PathBuilder::getHostedService( $this->rsi->getAppVersionId(), $this->rsi->getRelativePath() ) . DS . ".." ) . DS . $this->rsi->getAppVersionId() . ".xml";
+            
+                HostedModelHolder::setXMLModel( file_get_contents( $xml_path ) ); // load xml from file to holder
+                
+            }
             
             $this->initSdk();
-            $this->includeServiceClass();
             
             $instance_class_name = $this->rsi->getClassName();
             $arguments = $this->rsi->getArguments();
             
-            $hosted_mapper = new HostedMapper(  
-                                                PathBuilder::getHostedService( $this->rsi->getAppVersionId(), $this->rsi->getRelativePath() ),
-                                                $this->rsi->getAppVersionId()
-                                             );
+            $hosted_mapper = new HostedMapper();
             
-            $hosted_mapper->prepareArguments( //$instance_class_name, $this->rsi->getMethod(), $arguments );
+            $hosted_mapper->prepareArguments(   
                                                 $arguments,
                                                 $this->rsi->getMethod()    
                                             );
-            
             if( $hosted_mapper->isError() ) {
                 
                 Log::writeError( $hosted_mapper->getError()['msg'] );
                 return ResponderProcessor::sendResult( $this->rsi->getId(), $hosted_mapper->getError() );
                 
             }
-
+            
             $reflection_method = new ReflectionMethod( $this->rsi->getClassName(), $this->rsi->getMethod() );
 
             $result = $reflection_method->invokeArgs( new $instance_class_name(), $arguments );
-            
+
+            $invocation_result = new InvocationResult();
             $hosted_mapper->prepareResult( $result );
+            $invocation_result->setArguments( $result );
             
-            ResponderProcessor::sendResult( $this->rsi->getId(), $result );
+            ResponderProcessor::sendResult( $this->rsi->getId(), $invocation_result );
             
                 
         } catch( Exception $e ) { 
@@ -77,28 +85,8 @@ class HostedServiceInvocationTask extends Runnable
             
         }
     
-  }
-  
-    private function includeServiceClass() {
-      
-        $path = ClassManager::getPathByName( $this->rsi->getClassName() );
-
-        if( $path != null ) {
-
-            include $path;
-
-        } else {
-
-            $msg = "CodeRunner can't find RSI class: "; 
-
-            throw new Exception( $msg . $this->rsi->getClassName() );
-
-            ResponderProcessor::sendResult( $this->rsi->getId(), [ 'code' => 404, 'msg' => $msg ] );
-
-        }
-      
     }
-  
+    
     private function initSdk() {
 
         $invocation_context = new InvocationContext( $this->rsi->getInvocationContext() );

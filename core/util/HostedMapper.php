@@ -2,9 +2,9 @@
 namespace backendless\core\util;
 
 use backendless\core\util\XmlManager;
+use backendless\core\commons\holder\HostedModelHolder;
 use ReflectionClass;
-use backendless\core\Config;
-use backendless\core\parser\HostedServiceParser;
+
 
 class HostedMapper
 {
@@ -15,18 +15,12 @@ class HostedMapper
     protected $scalar_types = [ 'boolean', 'int', 'integer', 'float', 'string', 'String', 'array', 'Array' ];
     protected $xml_manager;
 
-    public function __construct( $path = null, $app_version_id = null ) {
+    public function __construct(  ) {
         
         $this->mapping_error = null;
         $this->xml_manager = new XmlManager();
-        
-        if( $path != null && $app_version_id != null ) {
-            
-            $xml_path = realpath( $path . DS . ".." ) . DS . $app_version_id . ".xml";
-            $this->xml_manager->loadDomtree( $xml_path );
-            
-        }
-        
+        $this->xml_manager->loadDomtree( HostedModelHolder::getXMLModel() );
+                
     }
 
     public function prepareArguments( &$arguments, $method_name ) {
@@ -48,10 +42,10 @@ class HostedMapper
     private function convertToClass( &$data, $type ) {
         
         if( ! class_exists( $type['class'] ) ) {
-            
+
             $this->mapping_error = [
                                         "code" => 10,
-                                        "msg" => "Class {$type['class']} don't declared or missing including file with class"    
+                                        "msg" => "Mpping error: class {$type['class']} don't declared or missing including file with class"    
                                 ];
             
             return;

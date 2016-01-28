@@ -61,8 +61,8 @@ class XmlManager
                                             'endpointURL'   =>  'endpointURL',
                                         ];
     
-    private $loaded_domtree = null;
-    private $xpath = null;
+    private static $loaded_domtree = null;
+    private static $xpath = null;
 
     public function buildXml( $data_array, $runtime_vars ) {
         
@@ -224,36 +224,32 @@ class XmlManager
         
     }
     
-    public function loadDomtree( $path_to_xml ) {
+    public function loadDomtree( $xml ) {
 
-        if( $this->loaded_domtree == null) {
+        if( self::$loaded_domtree == null ) {
             
-            $this->loaded_domtree = new DOMDocument('1.0', 'ISO-8859-1');
-            $this->loaded_domtree->load( $path_to_xml );
+            self::$loaded_domtree = new DOMDocument('1.0', 'ISO-8859-1');
+            self::$loaded_domtree->loadXML( $xml );
             
         }
-        
-        return $this;
+
     }
     
-    protected function initXpath() {
+    protected static function initXpath() {
 
-        if( $this->xpath == null) {
+        if( self::$xpath == null) {
             
-            $this->xpath = new DOMXpath( $this->loaded_domtree );
+            self::$xpath = new DOMXpath( self::$loaded_domtree );
             
         }
-        
-        return $this;
-        
         
     }
         
     public function getMethodDescription(  $method_name ) {
         
-        $this->initXpath();
+        self::initXpath();
         
-        $method_node = $this->xpath->query( '//service //method[@name="'. $method_name .'"]' );
+        $method_node = self::$xpath->query( '//service //method[@name="'. $method_name .'"]' );
         
         $description = [];
         
@@ -288,9 +284,9 @@ class XmlManager
     
     public function getClassDescription( $class_name ) {
         
-        $this->initXpath();
+        self::initXpath();
         
-        $class_node = $this->xpath->query( '//datatype[@fullname="'. $class_name .'"]' );
+        $class_node = self::$xpath->query( '//datatype[@fullname="'. $class_name .'"]' );
         
         $description = [];
         

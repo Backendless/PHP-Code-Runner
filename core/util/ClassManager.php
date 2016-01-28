@@ -30,11 +30,23 @@ class ClassManager
             
             $class_info = [];
             
+            $class_info['class_name'] = basename( $php_file->getRealPath(), ".php" );
+            
             //$class_info["parent_class"] = self::getParentClass( file_get_contents( $php_file->getRealPath() ) );
             
-            $class_info['namespace'] = str_replace( "/", "\\", trim( dirname( substr( $php_file->getRealPath(), strlen( $path_to_folder ) ) ), "/" ) );
+            //$class_info['namespace'] = str_replace( "/", "\\", trim( dirname( substr( $php_file->getRealPath(), strlen( $path_to_folder ) ) ), "/" ) );
             
-            $class_info['class_name'] = basename( $php_file->getRealPath(), ".php" );
+            $class_info['namespace'] = self::getNamespace( file_get_contents( $php_file->getRealPath() ) );
+            
+            if( $class_info['namespace'] != '' ) {
+                
+                $class_info['full_name'] = $class_info['namespace'] . '\\' . $class_info['class_name'];
+                
+            } else {
+                
+                $class_info['full_name'] = $class_info['class_name'];
+                
+            }
             
             $class_info['path'] = $php_file->getRealPath();
             
@@ -60,44 +72,44 @@ class ClassManager
         
     }
     
-    public static function analyzeHosted( $path_to_folder, $map_calsses = true ) { 
-        
-        Log::writeInfo( "ClassManager start analyze classes", "file" );
-        
-        $all_files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $path_to_folder ) );
-        $php_files = new RegexIterator($all_files, '/\.php$/');
-        
-       
-        foreach ( $php_files as $php_file) {
-            
-            $class_info = [];
-            
-            //$class_info["parent_class"] = self::getParentClass( file_get_contents( $php_file->getRealPath() ) );
-            
-            $class_info['namespace'] = self::getNamespace( file_get_contents( $php_file->getRealPath() ) );
-            
-            $class_info['class_name'] = basename( $php_file->getRealPath(), ".php" );
-            
-            
-            if( $class_info['namespace'] != '' ) {
-                
-                $class_info['full_name'] = $class_info['namespace'] . '\\' . $class_info['class_name'];
-                
-            } else {
-                
-                $class_info['full_name'] = $class_info['class_name'];
-                
-            }
-            
-            $class_info['path'] = $php_file->getRealPath();
-            
-            self::putToHolder( $class_info, 'full_name' );
-            
-        }
-       
-        Log::writeInfo( "ClassManager finished analyze classes", "file" );
-        
-    }
+//    public static function analyzeHosted( $path_to_folder, $map_calsses = true ) { 
+//        
+//        Log::writeInfo( "ClassManager start analyze classes", "file" );
+//        
+//        $all_files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $path_to_folder ) );
+//        $php_files = new RegexIterator($all_files, '/\.php$/');
+//        
+//       
+//        foreach ( $php_files as $php_file) {
+//            
+//            $class_info = [];
+//            
+//            //$class_info["parent_class"] = self::getParentClass( file_get_contents( $php_file->getRealPath() ) );
+//            
+//            $class_info['namespace'] = self::getNamespace( file_get_contents( $php_file->getRealPath() ) );
+//            
+//            $class_info['class_name'] = basename( $php_file->getRealPath(), ".php" );
+//            
+//            
+//            if( $class_info['namespace'] != '' ) {
+//                
+//                $class_info['full_name'] = $class_info['namespace'] . '\\' . $class_info['class_name'];
+//                
+//            } else {
+//                
+//                $class_info['full_name'] = $class_info['class_name'];
+//                
+//            }
+//            
+//            $class_info['path'] = $php_file->getRealPath();
+//            
+//            self::putToHolder( $class_info, 'full_name' );
+//            
+//        }
+//       
+//        Log::writeInfo( "ClassManager finished analyze classes", "file" );
+//        
+//    }
     
     private static function getNamespace( $code ) {
         
@@ -210,71 +222,6 @@ class ClassManager
         }
     }
     
-//    protected static function includeFile( $full_path ) {
-//        
-//        if( ! in_array( $full_path, self::$included ) ) {
-//
-//            //require $full_path;
-//            
-//            self::$included[] = $full_path;
-//
-//        }
-//        
-//    }
-    
-//    public static function addAsIncluded( $full_path ){
-//        
-//        if( ! in_array( $full_path, self::$included ) ) {
-//            
-//            self::$included[] = $full_path;
-//
-//        }
-//        
-//    }
-//    
-//    public static function IncludeIfStillNot( $class_name ) {
-//        
-//        $name_parts = explode("\\", $class_name);
-//        $count_elements = count( $name_parts );
-//        
-//        if( $count_elements > 0 ) {
-//            
-//            $class_name =  $name_parts[ $count_elements-1 ];
-//            
-//        }
-//        
-//        $path = self::getPathByClass( $class_name );
-//        
-//        if( $path !== null ) {
-//            
-//            self::includeFile( $path );
-//            
-//        } else {
-//            
-//            Log::writeError( "Try include unknown class: \"" . $class_name . "\"" );
-//            
-//            return false;
-//            
-//        }
-//        
-//        return true;
-//        
-//    }
-    
-//    protected static function getPathByClass( $class_name ) {
-//        
-//        if( array_key_exists($class_name, self::$classes_holder ) ) {
-//            
-//            return self::$classes_holder[$class_name]["path"];
-//            
-//        } else {
-//            
-//            null;
-//            
-//        }
-//                
-//    }
-    
     public static function getFullClassName( $class_name ) {
         
         $name_parts = explode("\\", $class_name);
@@ -329,8 +276,7 @@ class ClassManager
     }
     
     public static function debug(){
-        
-        //var_dump(self::$included);
+
         var_dump(self::$classes_holder);
         
     }

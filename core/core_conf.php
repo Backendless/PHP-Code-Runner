@@ -2,6 +2,7 @@
     
                 'lang'                      =>      'PHP',
                 'register_model_link'       =>      '/servercode/registermodel',
+                'register_hosted_model_link'=>      '/servercode/registermodel', //TODO set real url
                 'register_runner_link'      =>      '/servercode/registerRunner',
                 'unregister_runner_link'    =>      '/servercode/unregisterRunner',
                 'external_host'             =>      '/servercode/externalhosts',

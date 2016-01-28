@@ -109,6 +109,17 @@ class MessageDispatcher
 
         }
         
+        if ( GlobalState::$TYPE === 'CLOUD') {
+            
+            Config::$RELATIVE_PATH  =   $msg['relativePath'];
+            Config::$TASK_APPLICATION_ID = $msg['applicationId'];
+            
+            //ClassManager::analyze( PathBuilder::getClasses() );
+            ClassManager::analyze( PathBuilder::getHostedService( $rsi->getAppVersionId(), $rsi->getRelativePath() ) );
+            
+        }
+          
+        
         $executor = $this->executor_holder->getCodeExecutor( $rsi->getApplicationId(), $rsi->getAppVersionId() );
         $executor->invokeService( $rsi );
         
