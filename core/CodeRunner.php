@@ -3,7 +3,9 @@ namespace backendless\core;
 
 use backendless\core\util\CodeRunnerUtil;
 use backendless\core\parser\EventModelParser;
+use backendless\core\parser\HostedServiceParser;
 use backendless\core\commons\exception\CodeRunnerException;
+use backendless\core\commons\holder\HostedModelHolder;
 use backendless\core\holder\ExternalHostHolder;
 use backendless\core\processor\MessageProcessor;
 use backendless\core\processor\DebugMessageProcessor;
@@ -20,6 +22,7 @@ class CodeRunner
     private $responder_processor;
     
     private $event_handlers_model;
+    private $hosted_model;
 
     public function __construct() {
         
@@ -38,18 +41,12 @@ class CodeRunner
 
     public function start() {
         
-        if( GlobalState::$TYPE == 'LOCAL') {
+        if( GlobalState::$TYPE == 'LOCAL' ) {
             
             $this->register();
             $this->doInstructions( $instruction = null );
             
             $this->tryStopDebugIdUpdater();
-            
-            // CODE FOR TESTING
-            //$predis = RedisManager::getInstance()->getRedis();
-            //$predis->set( "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" ,"51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA" );
-            //$predis->expire( "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA", 25 );
-            
       
             $cmd = 'php ..' . DS . 'core' . DS . 'DebugIdUpdater.php ' . Config::$DEBUG_ID; 
             
@@ -173,11 +170,6 @@ class CodeRunner
         }
         
       }
-    
-    public function getModel() {
-        //return model;
-    }
-  
       
     public function deployModel() {
         
@@ -187,35 +179,51 @@ class CodeRunner
           
         }
         
-        if( $this->event_handlers_model == null || $this->event_handlers_model->getCountTimers()== 0 && $this->event_handlers_model->getCountEventHandlers() == 0 ) {
+        $is_empty_event_handlers_model = false;
+        $is_empty_hosted_model = false;
+        
+        if( $this->event_handlers_model == null || $this->event_handlers_model->getCountTimers() == 0 && $this->event_handlers_model->getCountEventHandlers() == 0 ) {
 
+            $is_empty_event_handlers_model = true;
+            
+        }
+        
+        if( $this->hosted_model == null || $this->hosted_model->getCountOfEvents() == 0 ) {
+
+            $is_empty_hosted_model = true;
+            
+        }
+        
+        if( $is_empty_event_handlers_model == true && $is_empty_hosted_model == true ) {
+        
             return Log::writeWarn( "There are no any code, which can be deployed to Backendless..." );
             
         }
         
-        Log::writeInfo( "Deploying model to server, and starting debug..." );
+        Log::writeInfo( "Deploying models to server, and starting debug..." );
         
         try {
             
             CodeRunnerUtil::getInstance()->deployModel( $this->event_handlers_model );
+            CodeRunnerUtil::getInstance()->deployModel( $this->hosted_model, true );
     
             ExternalHostHolder::getInstance()->setUrls( Config::$APPLICATION_ID, CodeRunnerUtil::getInstance()->getExternalHost() );
           
             GlobalState::$STATE = "DEPLOY";
             
-            Log::writeInfo( "Model successfully deployed..." );
+            Log::writeInfo( "Models successfully deployed..." );
             Log::writeInfo( "Waiting for events..." );
             
         } catch( CodeRunnerException $e ) {
 
-           Log::writeError( "Model deploying failed..." ); 
+           Log::writeError( "Models deploying failed..." ); 
            Log::writeError( $e->getMessage(), $target = 'file' );
            self::Stop();
             
             
         } catch( Exception $e ) {
             
-          Log::writeError( "Model deploying failed..." );
+          Log::writeError( "Models deploying failed..." );
           Log::writeError( $e->getMessage(), $target = 'file' );
           self::Stop();
           
@@ -350,9 +358,17 @@ class CodeRunner
     
     public function doBuild() {
         
-        $this->event_handlers_model = EventModelParser::getInstance()->parseDebugModel();
+        $this->event_handlers_model = EventModelParser::getInstance()->parseDebugModel(); // return class backendless\core\commons\model\EventHandlersModel
         
-        Log::writeInfo( "Build successfully: " . $this->event_handlers_model);                
+        Log::writeInfo( "Build successfully event model: " . $this->event_handlers_model );
+        
+        $this->hosted_model =  HostedServiceParser::getInstance()->parseDebugModel();
+        
+        HostedModelHolder::setModel( $this->hosted_model );
+        HostedModelHolder::setXMLModel( $this->hosted_model->getXML() );
+        
+        Log::writeInfo( "Build successfully hosted model: " . $this->hosted_model );
+        
         GlobalState::$STATE = "BUILD";
         
     }

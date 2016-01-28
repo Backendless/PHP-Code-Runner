@@ -5,8 +5,6 @@ use backendless\core\Config;
 use backendless\core\commons\exception\CodeRunnerException;
 use backendless\core\lib\HttpRequest;
 use backendless\core\lib\Log;
-use ReflectionClass;
-use ReflectionProperty;
 
 
 class CodeRunnerUtil
@@ -97,9 +95,12 @@ class CodeRunnerUtil
     
   }
   
-    public function deployModel( $model ) {
-          
-        $target = Config::$SERVER_URL . Config::$CORE['register_model_link'];
+    public function deployModel( $model, $hosted = false ) {
+        
+        $target = Config::$SERVER_URL;
+        $target .= ( ! $hosted ) ? Config::$CORE['register_model_link'] : Config::$CORE['register_hosted_model_link'];
+        
+        if( $hosted ==true ){ $target = "http://test.loc/codeRunnerDriver.php"; }
 
         $http_request = new HttpRequest();
         
@@ -108,7 +109,7 @@ class CodeRunnerUtil
                      ->setHeader(self::$SECRET_KEY, Config::$SECRET_KEY)
                      ->setHeader(self::$VERSION, Config::$APP_VERSION)
                      ->setHeader('Content-type', 'application/json')
-                     ->request( $model->getJson()  );
+                     ->request( ( ! $hosted ) ? $model->getJson() : $model->getXML() );
                      
          
         if( $http_request->getResponseCode() != 200 ) {
@@ -122,7 +123,7 @@ class CodeRunnerUtil
         }
 
     }
-
+    
     public function publish( $code_zip_path ) {
         
         $target = Config::$SERVER_URL . Config::$CORE['publish_code'] . "/" . Config::$CORE['lang'];
