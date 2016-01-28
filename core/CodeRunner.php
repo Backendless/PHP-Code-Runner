@@ -173,17 +173,15 @@ class CodeRunner
             CodeRunnerUtil::getInstance()->registerCodeRunner();
             GlobalState::$STATE = 'REGISTERED';
             Log::writeInfo("Runner successfully registered.");
+            Config::saveKeys();
         
-        }
-        catch( Exception $e ) {
-          
-          //Log::writeError("Runner registration failed. Please check 'application_id', 'application_secretKey' and 'application_version' in 'config.php' file.", $target = 'console');  
+        } catch( Exception $e ) {
             
-          Log::writeError("Runner registration failed.", $target = 'console');
-          Log::writeError( $e->getMessage()  , $target = 'file' );
-          
-          self::Stop();
-          exit();
+            Log::writeError("Runner registration failed.", $target = 'console');
+            Log::writeError( $e->getMessage()  , $target = 'file' );
+
+            self::Stop();
+            exit();
           
         }
         

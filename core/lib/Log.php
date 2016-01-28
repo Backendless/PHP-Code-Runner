@@ -115,7 +115,18 @@ class Log {
     
     protected static function writeToConsole( $msg ) {
         
-        echo $msg . "\n";
+        $new_line = substr( $msg, -6);
+        
+        if( $new_line != '!<new>') {
+            
+            echo $msg . "\n";
+            
+        }else {
+            
+            echo substr( $msg, 0, -6);
+            
+        }
+        
         
     }
 
@@ -142,5 +153,3 @@ class Log {
     }
     
 }
-
-

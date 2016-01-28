@@ -8,6 +8,7 @@ class Config
     private static $CORE_CONFIG_FILE = "core_conf.php";
     private static $VERSION_FILE = "version.php";
 
+    public static $need_save_keys = false;
     public static $APPLICATION_ID;
     public static $SECRET_KEY;
     public static $APP_VERSION;
@@ -46,8 +47,10 @@ class Config
 
         self::$APPLICATION_ID = ( is_string( $config['application_id']) ) ? trim( $config['application_id'] ) :  $config['application_id'];
         self::$SECRET_KEY = ( is_string( $config['application_secret_key']) ) ? trim( $config['application_secret_key'] ) : $config['application_secret_key'];
-
+        
         self::$APP_VERSION = ( isset($config['application_version']) ) ?  trim( $config['application_version'] ) : 'v1';
+        
+        if( self::$APP_VERSION == '<application_version>' || self::$APP_VERSION == '' ) { self::$APP_VERSION = null; }
 
         self::$CLASS_LOCATION = ( isset($config['location_classes']) ) ?  trim( $config['location_classes'] ) : '..' . DS .'classes';
         self::$CLASS_LOCATION = str_replace( '/', DS, self::$CLASS_LOCATION );
@@ -93,14 +96,18 @@ class Config
 
   }
 
-    public static function saveKeys(){
+    public static function saveKeys() {
 
-        $config = include BP . DS . self::$RUNNER_PROPERTIES_FILE;
+        if( self::$need_save_keys == true ) {
+            
+            $config = include BP . DS . self::$RUNNER_PROPERTIES_FILE;
 
-        $config['application_id'] = self::$APPLICATION_ID;
-        $config['application_secret_key'] = self::$SECRET_KEY;
+            $config['application_id'] = self::$APPLICATION_ID;
+            $config['application_secret_key'] = self::$SECRET_KEY;
+            $config['application_version']  = self::$APP_VERSION;
 
-        file_put_contents( BP . DS . self::$RUNNER_PROPERTIES_FILE, "<?php return " . var_export($config, true) . "; \n" );
+            file_put_contents( BP . DS . self::$RUNNER_PROPERTIES_FILE, "<?php return " . var_export( $config, true ) . "; \n" );
+        }
 
     }
   
@@ -131,4 +138,3 @@ class Config
     } 
     
 }
-
