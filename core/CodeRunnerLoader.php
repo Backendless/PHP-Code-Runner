@@ -123,6 +123,17 @@ class  CodeRunnerLoader
             
         }
         
+        if( $argc == 2 ) {
+            
+             if( $argv[1] == "deploy" ) {
+            
+                 Config::$AUTO_PUBLISH = true;
+                 return;
+                 
+             }
+            
+        }
+        
         $argv_position = 0;
         
         if( $argc == 5) {
@@ -142,9 +153,9 @@ class  CodeRunnerLoader
 
         if( $argc == 4 || $argc == 5 ) {
             
-            Config::$APPLICATION_ID = $argv[$argv_position+1];
-            Config::$SECRET_KEY     = $argv[$argv_position+2];
-            Config::$APP_VERSION    = $argv[$argv_position+3];
+            Config::$APPLICATION_ID = $argv[ $argv_position+1 ];
+            Config::$SECRET_KEY     = $argv[ $argv_position+2 ];
+            Config::$APP_VERSION    = $argv[ $argv_position+3 ];
             Config::$need_save_keys = true;
 
             // chek if not format for cloud run
