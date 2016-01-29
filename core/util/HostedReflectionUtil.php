@@ -35,7 +35,7 @@ class HostedReflectionUtil {
     protected $type_parser;
     
     public function __construct( $path = null /*, $rai_id = null*/ ) {
-        
+
         $this->base_interface_name = Config::$CORE["hosted_interface_name"];
         $this->interface_implementation_info = null;
         $this->path_to_classes = [];
@@ -55,13 +55,18 @@ class HostedReflectionUtil {
         
         $this->scanDirectory();
         $this->scanCode();
-        $this->dataTypeConvertation();
+        
+        if ( $this->is_exist_interface ) {
+            
+            $this->dataTypeConvertation();
+            
+        } 
         
     }
     
     protected function scanDirectory( ) {
         
-        $skip_folders = [ 'lib' ]; // lib folder can contain libraries which needed user
+        $skip_folders = [ ]; // folder can contain libraries which needed user
                 
         $files_iterator = new RecursiveIteratorIterator(
                                                          new RecursiveCallbackFilterIterator(
@@ -80,16 +85,6 @@ class HostedReflectionUtil {
             
         }
         
-        if( count( $this->path_to_classes) <= 0 ) {
-            
-            $this->parsing_error["code"] = 1;
-            $this->parsing_error["msg"] = "Not found any files for parsing.";
-            
-            Log::writeError("Hosted Service: Not found any files for parsing.", 'file');
-            
-            return;
-            
-        }
     }
     
     protected function scanCode( ) {
@@ -108,23 +103,21 @@ class HostedReflectionUtil {
             
         }
         
-        $this->parseServiceImplement( $this->interface_implementation_info );
-        
-        foreach ( $class_description_list as $description_item ) {
-        
-            $this->parseServiceDataClass( $description_item );
+        if ( !$this->is_exist_interface ) {
             
-        }
+            Log::writeInfo("Not found implementation for '" . Config::$CORE["hosted_interface_name"] . "'", 'file');
+            
+        } else {
         
-        $this->deleteUnusedClasses();
-        
-        if( $this->is_exist_interface === false ) {
-            
-            $this->parsing_error["code"] = 2;
-            $this->parsing_error["msg"] = "Not found implementation for '" . Config::$CORE["hosted_interface_name"] . "'";
-            
-            Log::writeError("Hosted Service: Not found implementation for '" . Config::$CORE["hosted_interface_name"] . "'", 'file');
-            
+            $this->parseServiceImplement( $this->interface_implementation_info );
+
+            foreach ( $class_description_list as $description_item ) {
+
+                $this->parseServiceDataClass( $description_item );
+
+            }
+
+            $this->deleteUnusedClasses();
         }
         
     }
@@ -263,14 +256,14 @@ class HostedReflectionUtil {
         $used_types = $this->type_parser->getListOfUsedTypes();
 
         foreach ( $this->classes_holder as $key => $class_definition ) {
-            
+
             if( !in_array( $class_definition['fullname'], $used_types ) ) {
-                
+
                 unset( $this->classes_holder[ $key ] );
             }
-            
+
         }
-        
+
         $this->classes_holder = array_values( $this->classes_holder ); // re-index array
         
     }

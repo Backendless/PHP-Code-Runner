@@ -279,7 +279,6 @@ class  CodeRunnerLoader
             Log::writeWarn('All https requests to ' . Config::$SERVER_URL . 'changed on http requests', $target='file');
             
         }
-         
        
       }
 }

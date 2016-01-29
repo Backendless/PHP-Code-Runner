@@ -100,7 +100,7 @@ class CodeRunnerUtil
         $target = Config::$SERVER_URL;
         $target .= ( ! $hosted ) ? Config::$CORE['register_model_link'] : Config::$CORE['register_hosted_model_link'];
         
-        if( $hosted ==true ){ $target = "http://test.loc/codeRunnerDriver.php"; }
+        if( $hosted ==true ){ $target = "http://test.loc/codeRunnerDriver.php"; } //TODO: delete line of code
 
         $http_request = new HttpRequest();
         
@@ -124,10 +124,13 @@ class CodeRunnerUtil
 
     }
     
-    public function publish( $code_zip_path ) {
+    public function publish( $code_zip_path, $hosted = false ) {
         
-        $target = Config::$SERVER_URL . Config::$CORE['publish_code'] . "/" . Config::$CORE['lang'];
+        $target = Config::$SERVER_URL;
+        $target .= ( ! $hosted ) ? Config::$CORE['publish_code'] . "/" . Config::$CORE['lang'] : Config::$CORE['hosted_publish_code'] . "/" . Config::$CORE['lang'];
 
+        if( $hosted ==true ){ $target = "http://test.loc/codeRunnerDriver.php"; } //TODO: delete line of code
+         
         $http_request = new HttpRequest();
 
         $multipart_boundary ="------BackendlessFormBoundary" . md5(uniqid()) . microtime(true);

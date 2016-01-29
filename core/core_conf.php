@@ -7,6 +7,7 @@
                 'unregister_runner_link'    =>      '/servercode/unregisterRunner',
                 'external_host'             =>      '/servercode/externalhosts',
                 'publish_code'              =>      '/servercode/publishcode',
+                'hosted_publish_code'       =>      '/servercode/publishcodeHOSTED', //TODO set real url
     
     
     

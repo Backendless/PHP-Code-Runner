@@ -7,6 +7,7 @@ use RegexIterator;
 use backendless\core\lib\Log;
 use backendless\core\lib\Autoload;
 use backendless\Backendless;
+use backendless\core\commons\exception\CodeRunnerException;
 
 //class using for including user classes from folder "classes" in cloud and local mode, 
 //also helper for creating class instances, and keep track of what classes have been included and which are not
@@ -20,6 +21,12 @@ class ClassManager
     public static function analyze( $path_to_folder, $map_calsses = true ) { 
         
         Log::writeInfo( "ClassManager start analyze classes", "file" );
+        
+        if( $path_to_folder == false) { 
+            
+            throw new CodeRunnerException( "Wrong path to code source" );
+            
+        }
         
         $all_files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $path_to_folder ) );
         $php_files = new RegexIterator($all_files, '/\.php$/');

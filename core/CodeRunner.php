@@ -117,7 +117,7 @@ class CodeRunner
 
             }
             
-            if (Config::$STATUS == "registered" ) {
+            if ( Config::$STATUS == "registered" ) {
                 
                 CodeRunnerUtil::getInstance()->unRegisterCodeRunner();
                 Log::writeInfo("Debugging Utility disconnected successfully.");
@@ -169,7 +169,6 @@ class CodeRunner
         try {
             
             CodeRunnerUtil::getInstance()->registerCodeRunner();
-            GlobalState::$STATE = 'REGISTERED';
             Log::writeInfo("Runner successfully registered.");
             Config::saveKeys();
         
@@ -187,12 +186,6 @@ class CodeRunner
       
     public function deployModel() {
         
-        if( GlobalState::$STATE != "BUILD" ) {
-            
-          return Log::writeWarn( "You should build EventModel first!" );
-          
-        }
-        
         $is_empty_event_handlers_model = false;
         $is_empty_hosted_model = false;
         
@@ -208,14 +201,22 @@ class CodeRunner
             
         }
         
-        if( $this->event_handlers_model == null || $this->event_handlers_model->getCountTimers()== 0 && $this->event_handlers_model->getCountEventHandlers() == 0 ) {
+        if( $is_empty_event_handlers_model && $is_empty_hosted_model ) {
 
             Log::writeWarn( "There is no code to deploy to Backendless..." );
             exit();
             
         }
         
-        Log::writeInfo( "Deploying models to server, and starting debug..." );
+        if( !Config::$AUTO_PUBLISH ) {
+            
+            Log::writeInfo( "Deploying models to server, and starting debug..." );
+            
+        }else{
+            
+            Log::writeInfo( "Deploying models to server..." );
+            
+        }
         
         try {
             
@@ -223,11 +224,14 @@ class CodeRunner
             CodeRunnerUtil::getInstance()->deployModel( $this->hosted_model, true );
     
             ExternalHostHolder::getInstance()->setUrls( Config::$APPLICATION_ID, CodeRunnerUtil::getInstance()->getExternalHost() );
-          
-            GlobalState::$STATE = "DEPLOY";
             
             Log::writeInfo( "Models successfully deployed..." );
-            Log::writeInfo( "Waiting for events..." );
+            
+            if( !Config::$AUTO_PUBLISH ) {
+                
+                Log::writeInfo( "Waiting for events..." );
+                
+            }
             
         } catch( CodeRunnerException $e ) {
 
@@ -243,77 +247,51 @@ class CodeRunner
           self::Stop();
           
         }
-  }
+        
+    }
 
-    public function publishCode() {
+    public function publishCode( $hosted = false ) {
 
-        if( ! file_exists ( Config::$CORE['tmp_dir_path'] ) ) {
+        $this->resetTmpFolder( $hosted );
+
+        if( $hosted ) {
             
-            mkdir( Config::$CORE['tmp_dir_path'], 0777 );
-          
+            $hosted_events = $this->hosted_model->getCountOfEvents();
+            
+            if( $hosted_events <= 0) { return; }
+            
+            Log::writeInfo("Deploying $hosted_events hosted service event to the server… ");
+            
+        } else {
+            
+            $handlers = $this->event_handlers_model->getCountEventHandlers() == 1 ? "handler" : "handlers";
+            $timers = $this->event_handlers_model->getCountTimers() == 1 ? "timer" : "timers";
+            
+            if( ($this->event_handlers_model->getCountEventHandlers() + $this->event_handlers_model->getCountTimers()) <= 0 ) { return; }
+            
+            Log::writeInfo("Deploying {$this->event_handlers_model->getCountEventHandlers()} event " . $handlers . " and {$this->event_handlers_model->getCountTimers()} " . $timers . " to the server… ");
+            
         }
-        
-        $handlers = $this->event_handlers_model->getCountEventHandlers() == 1 ? "handler" : "handlers";
-        $timers = $this->event_handlers_model->getCountTimers() == 1 ? "timer" : "timers";
-        
-        Log::writeInfo("Deploying {$this->event_handlers_model->getCountEventHandlers()} event " . $handlers . " and {$this->event_handlers_model->getCountTimers()} " . $timers . " to the server… ");
 
         try{
             
-            $code_zip_path = realpath( getcwd() . DS . Config::$CORE['tmp_dir_path'] ) .DS. 'code.zip';
+            $code_zip_path = realpath( getcwd() . DS . Config::$CORE['tmp_dir_path'] );
             
-            $classes_path = realpath( getcwd() . DS . Config::$CLASS_LOCATION);
-
-            $zip = new ZipArchive;
-            
-            $zip->open( $code_zip_path, ZipArchive::CREATE );
-
-            $files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator($classes_path), RecursiveIteratorIterator::LEAVES_ONLY);
-            
-            $class_location_folder_name = basename ( Config::$CLASS_LOCATION );
-            
-            foreach ( $files as $file ) {
-
-                if( $file->getFileName() === '.' || $file->getFileName() == '..') {
-                    continue;
-                }
-                
-                $path_part = explode($class_location_folder_name, $file);
-                $zip->addFile($file, $class_location_folder_name . $path_part[1] );
-                
+            if( $hosted ) {
+                 $code_zip_path .= DS . 'hosted' .DS. 'code.zip';
+            }else{
+                $code_zip_path .= DS . 'events' . DS . 'code.zip';
             }
             
-            $lib_path = realpath( getcwd() . DS . ".." . DS . 'lib' );
+            $this->createArchive( $code_zip_path, $hosted );
+
+            CodeRunnerUtil::getInstance()->publish( $code_zip_path, $hosted );
             
-            $files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator($lib_path), RecursiveIteratorIterator::LEAVES_ONLY );
-
-            foreach ( $files as $file ) {
-
-                if( $file->getFileName() === '.' || $file->getFileName() == '..') {
-                    continue;
-                }
-                
-                $path_part = explode('lib', $file);
-                $zip->addFile($file, 'lib' . $path_part[1] );
-                
+            if( $hosted ) {
+                Log::writeInfo( "Successfully deployed all hosted user code." );
+            } else {
+                Log::writeInfo( "Successfully deployed all event handlers and timers." );
             }
-            
-            $model_file_path = realpath( getcwd() . DS . Config::$CORE['tmp_dir_path'] );
-            $model_file_path .=  DS . 'model.json';
-            
-            file_put_contents( $model_file_path, $this->event_handlers_model->getJson(true));
-            
-            $zip->addFile( $model_file_path, 'model.json' );
-
-            $zip->close();
-            
-            unlink($model_file_path);
-            
-            CodeRunnerUtil::getInstance()->publish( $code_zip_path );
-
-            GlobalState::$STATE = 'PUBLISH';
-
-            Log::writeInfo( "Successfully deployed all event handlers and timers." );
 
             if( ($this->event_handlers_model->getCountEventHandlers() + $this->event_handlers_model->getCountTimers()) > 5 ) {
                 
@@ -322,30 +300,114 @@ class CodeRunner
                 Log::writeInfo( "The billing screen is available at Manage > Billing." );
                 
             }
-
-            Log::writeInfo( "CodeRunner will shutdown now." );
-            
-            $this->rrmdir( Config::$CORE['tmp_dir_path'] );
-            
-            exit(0);
-            
-            
             
         } catch( CodeRunnerException $e ) {
             
-            Log::writeError( $e->getMessage(), $target= 'all'); //change to file
+            Log::writeError( $e->getMessage(), $target= 'file');
             
             Log::writeError( "Code publishing failed..", $target= 'all');
             
-            if( file_exists ( Config::$CORE['tmp_dir_path'] ) ) {
-                
-               $this->rrmdir( Config::$CORE['tmp_dir_path'] );
-                
-            }
+            $this->removeTmpFolder();
             
         }
         
-  }
+    }
+  
+    protected function resetTmpFolder( $hosted ){
+        
+        $dir_path = Config::$CORE['tmp_dir_path'];
+        
+        if( $hosted ) {
+        
+            $dir_path .= DS . 'hosted';
+            
+        } else {
+            
+            $dir_path .= DS . 'events';
+            
+        }
+        
+        if( file_exists( $dir_path ) ) { 
+
+            $this->rrmdir( $dir_path );
+
+        }
+            
+        mkdir( $dir_path, $mode = 0777, $recursive = true );
+        
+    }
+    
+    protected function removeTmpFolder() {
+        
+        $this->rrmdir( Config::$CORE['tmp_dir_path'] );
+                    
+    }
+    
+    protected function createArchive( $code_zip_path, $hosted ) {
+        
+        $classes_path = realpath( getcwd() . DS . Config::$CLASS_LOCATION );
+
+        $zip = new ZipArchive;
+
+        $zip->open( $code_zip_path, ZipArchive::CREATE );
+
+        $files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $classes_path ), RecursiveIteratorIterator::LEAVES_ONLY );
+
+        $class_location_folder_name = basename ( Config::$CLASS_LOCATION );
+
+        foreach ( $files as $file ) {
+
+            if( $file->getFileName() === '.' || $file->getFileName() == '..') {
+                continue;
+            }
+
+            $path_part = explode( $class_location_folder_name, $file);
+            $zip->addFile( $file, $class_location_folder_name . $path_part[1] );
+
+        }
+
+        $lib_path = realpath( getcwd() . DS . ".." . DS . 'lib' );
+
+        $files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $lib_path ), RecursiveIteratorIterator::LEAVES_ONLY );
+
+        foreach ( $files as $file ) {
+
+            if( $file->getFileName() === '.' || $file->getFileName() == '..' ) {
+                continue;
+            }
+
+            $path_part = explode( 'lib', $file );
+            $zip->addFile( $file, 'lib' . $path_part[1] );
+
+        }
+        
+        $model_file_path = realpath( getcwd() . DS . Config::$CORE['tmp_dir_path'] );
+        
+        $new_file_name = '';
+        
+        if( $hosted ) {
+            
+            $model_file_path .=  DS . 'hosted' . DS . 'model.xml';
+            $new_file_name = 'model.xml';
+
+            file_put_contents( $model_file_path, $this->hosted_model->getXML() );
+
+        } else {    
+            
+            $model_file_path .=  DS . 'events' . DS . 'model.json';
+            $new_file_name = 'model.json';
+
+            file_put_contents( $model_file_path, $this->event_handlers_model->getJson( true ) );
+            
+        }
+        
+        $zip->addFile( $model_file_path, $new_file_name );
+        
+        $zip->close();
+        
+        unlink( $model_file_path );
+        
+    }
   
     public function doInstructions( $instruction ) {
         
@@ -354,9 +416,12 @@ class CodeRunner
         $this->doBuild();
         $this->deployModel();
         
-        if( Config::$AUTO_PUBLISH) {
+        if( Config::$AUTO_PUBLISH ) {
             
             $this->publishCode();
+            $this->publishCode( $hosted = true );
+            $this->removeTmpFolder();
+            Log::writeInfo( "CodeRunner will shutdown now." );
             exit(0);
             
         }
@@ -373,7 +438,7 @@ class CodeRunner
     
     public function doBuild() {
         
-        $this->event_handlers_model = EventModelParser::getInstance()->parseDebugModel(); // return class backendless\core\commons\model\EventHandlersModel
+        $this->event_handlers_model = EventModelParser::getInstance()->parseDebugModel(); 
         
         Log::writeInfo( "Build successfully event model: " . $this->event_handlers_model );
         
@@ -383,8 +448,6 @@ class CodeRunner
         HostedModelHolder::setXMLModel( $this->hosted_model->getXML() );
         
         Log::writeInfo( "Build successfully hosted model: " . $this->hosted_model );
-        
-        GlobalState::$STATE = "BUILD";
         
     }
     

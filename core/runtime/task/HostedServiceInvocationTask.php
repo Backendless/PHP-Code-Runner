@@ -20,7 +20,6 @@ class HostedServiceInvocationTask extends Runnable
     
     private $sdk_loader; 
     private $rsi;
-    private static $xml_model;
 
     public function __construct( $rsi ) {
 

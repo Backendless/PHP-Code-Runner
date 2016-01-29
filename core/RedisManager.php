@@ -4,7 +4,7 @@ namespace backendless\core;
 use Predis\Client as Predis;
 use backendless\core\Config;
 use backendless\core\lib\Log;
-use Exception;
+use Predis\Connection\ConnectionException;
 
 
 class RedisManager
@@ -27,7 +27,7 @@ class RedisManager
             // Log::writeInfo("Successfully connected to Redis", $target = 'file');
             
             
-        } catch ( Exception $e ){
+        } catch ( ConnectionException $e ){
             
             Log::writeError("Couldn't connected to Redis", $target = 'file');
             

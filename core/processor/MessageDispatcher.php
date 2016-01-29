@@ -119,7 +119,6 @@ class MessageDispatcher
             
         }
           
-        
         $executor = $this->executor_holder->getCodeExecutor( $rsi->getApplicationId(), $rsi->getAppVersionId() );
         $executor->invokeService( $rsi );
         

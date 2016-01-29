@@ -78,18 +78,21 @@ class XmlManager
         $root->appendChild( $runtime );
 
         $this->fillAttributes( $runtime, $this->runtime_tag_attributes, $runtime_vars, false );
-
-        foreach ( $data_array["datatype"] as $class_info ) {
-
-            $this->addNodeByNamespace( $this->builDatatypeNode( $class_info, $domtree ), $domtree, $root,  $class_info['namespace'] );
-            
-        }
         
-        $this->addNodeByNamespace(  $this->builServiseNode( $data_array['service']['class_description'], $data_array['service']['methods'], $domtree ), 
-                                    $domtree, 
-                                    $root,  
-                                    $data_array['service']['class_description']['namespace'] 
-                                 );
+        if( isset($data_array["datatype"]) ) {
+
+            foreach ( $data_array["datatype"] as $class_info ) {
+
+                $this->addNodeByNamespace( $this->builDatatypeNode( $class_info, $domtree ), $domtree, $root,  $class_info['namespace'] );
+
+            }
+
+            $this->addNodeByNamespace(  $this->builServiseNode( $data_array['service']['class_description'], $data_array['service']['methods'], $domtree ), 
+                                        $domtree, 
+                                        $root,  
+                                        $data_array['service']['class_description']['namespace'] 
+                                     );
+        }
         
         return $domtree->saveXML();
         
