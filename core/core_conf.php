@@ -29,6 +29,6 @@
                 'local_shutdown_code'   =>  1 << 14, 
                 'to_code_runner'        =>   'MAIN_EVENTS_CHANNEL',
                 'tmp_dir_path'          => '../.tmp',
-                'is_cloud_debug_mode'   => false
+                'logging_in_cloud_mode'   => false
     
             ];
