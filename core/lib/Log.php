@@ -9,10 +9,12 @@ class Log {
     protected static $is_colored_glob = true;
     
     protected static $log_path;
+
+    protected static $is_write = true;
     
     protected static $colors = [ 'blue' => '0;34', 'yellow' => '1;33', 'red' => '0;31' ];
     
-    public static function init( $os_type = '' ) {
+    public static function init( $os_type = '', $mode, $is_debug ) {
         
         self::$log_path =  BP . DS . self::$app_log_dir ;
         
@@ -25,6 +27,12 @@ class Log {
         if( $os_type == "WIN") {
             
             self::$is_colored_glob = false;
+            
+        }
+        
+        if( $mode == 'CLOUD' && $is_debug == false ) {
+            
+            self::$is_write = false;
             
         }
         
@@ -115,6 +123,8 @@ class Log {
     
     protected static function writeToConsole( $msg ) {
         
+        if( ! self::$is_write ) { return; } 
+        
         $new_line = substr( $msg, -6);
         
         if( $new_line != '!<new>') {
@@ -132,6 +142,8 @@ class Log {
 
     protected static function writeToFile( $msg ) {
         
+        if( ! self::$is_write ) { return; } 
+        
         $log_file_path = self::$log_path . DS . self::$app_log_file;
         
         if( !file_exists($log_file_path) ) {
@@ -145,6 +157,8 @@ class Log {
     }
     
     public static function writeToLogFile( $msg ) {
+        
+        if( ! self::$is_write ) { return; } 
         
         $log_file_path = self::$log_path . DS . self::$app_log_file;
         

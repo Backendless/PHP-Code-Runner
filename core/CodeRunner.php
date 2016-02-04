@@ -119,14 +119,18 @@ class CodeRunner
 
             }
             
-            if (Config::$STATUS == "registered" ) {
+            if ( Config::$STATUS == "registered" ) {
                 
                 CodeRunnerUtil::getInstance()->unRegisterCodeRunner();
                 Log::writeInfo("Debugging Utility disconnected successfully.");
                 Log::writeToLogFile("\n");
             }
             
-            $this->tryStopDebugIdUpdater();            
+            if( GlobalState::$TYPE == 'LOCAL' ) {
+                
+                $this->tryStopDebugIdUpdater();            
+                
+            }
                 
             Log::writeInfo("Thank you for using Backendless.\n", "console");    
                 

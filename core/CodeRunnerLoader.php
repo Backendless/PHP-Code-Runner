@@ -19,7 +19,7 @@ class  CodeRunnerLoader
 
         self::phpEnviromentInit();
         
-        Log::init( Config::$CORE['os_type'] );
+        Log::init( Config::$CORE['os_type'], GlobalState::$TYPE, Config::$CORE['is_cloud_debug_mode'] );
         
         Log::writeInfo("Start CodeRunner.", $target = 'file');
         
