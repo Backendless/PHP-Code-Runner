@@ -125,7 +125,11 @@ class CodeRunner
                 Log::writeToLogFile("\n");
             }
             
-            $this->tryStopDebugIdUpdater();            
+            if( GlobalState::$TYPE == 'LOCAL' ) {
+                
+                $this->tryStopDebugIdUpdater();            
+                
+            }
                 
             Log::writeInfo("Thank you for using Backendless.\n", "console");    
                 

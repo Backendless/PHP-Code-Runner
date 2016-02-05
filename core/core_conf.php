@@ -44,6 +44,7 @@
                 'local_shutdown_code'   =>  1 << 14, 
                 'to_code_runner'        =>   'MAIN_EVENTS_CHANNEL',
                 'tmp_dir_path'          => '../.tmp',
+
     
                 'hosted_service' => [
                     
@@ -57,6 +58,8 @@
                                         "service_arg_mapping" => 'serviceArgMapping',
                                         "data_model_properties" =>'dataModelProperties',
                     
-                                    ]
+                                    ],
+
+                'logging_in_cloud_mode'   => false
     
             ];
