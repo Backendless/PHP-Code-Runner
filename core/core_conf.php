@@ -1,13 +1,19 @@
 <?php return [
     
                 'lang'                      =>      'PHP',
-                'register_model_link'       =>      '/servercode/registermodel',
-                'register_hosted_model_link'=>      '/servercode/registermodel', //TODO set real url
+    
                 'register_runner_link'      =>      '/servercode/registerRunner',
                 'unregister_runner_link'    =>      '/servercode/unregisterRunner',
                 'external_host'             =>      '/servercode/externalhosts',
+    
+                // events service
+                'register_model_link'       =>      '/servercode/registermodel',
                 'publish_code'              =>      '/servercode/publishcode',
-                'hosted_publish_code'       =>      '/servercode/publishcodeHOSTED', //TODO set real url
+    
+                // hosted service
+                'register_hosted_model_link'=>      '/servercode/services/debug',
+                'delete_hosted_model_link'  =>      '/servercode/services/debug',
+                'hosted_publish_code'       =>      '/servercode/services',
     
     
     

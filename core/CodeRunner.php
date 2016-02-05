@@ -119,6 +119,7 @@ class CodeRunner
             
             if ( Config::$STATUS == "registered" ) {
                 
+                CodeRunnerUtil::getInstance()->deleteHostedModel();
                 CodeRunnerUtil::getInstance()->unRegisterCodeRunner();
                 Log::writeInfo("Debugging Utility disconnected successfully.");
                 Log::writeToLogFile("\n");

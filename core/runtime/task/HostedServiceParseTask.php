@@ -26,7 +26,7 @@ class HostedServiceParseTask extends Runnable
 
     public function runImpl() {
         
-        Log::writeInfo("Called invocation task: " . $this->rai, $target = 'file' );
+        Log::writeInfo("Called invocation task task: " . $this->rai, $target = 'file' );
 
         if( $this->rai == null ) {
             
@@ -39,20 +39,14 @@ class HostedServiceParseTask extends Runnable
             
             $path_to_hosted = PathBuilder::getHostedService( $this->rai->getAppVersionId(), $this->rai->getRelativePath() );
             
-            $hosted_parser = new HostedServiceParser( 
-                                                        $path_to_hosted, 
-                                                        $this->rai->getId() 
-                                                    );
-            
-            $hosted_parser->parseFolderWithCustomCode(); 
-            
-            if( $hosted_parser->isError() ) {
+            $parser = HostedServiceParser::getInstance()->parseModelRAI( $path_to_hosted ); 
+
+            if( $parser->isError() ) {
                 
-                Log::writeError( $hosted_parser->getError()['msg'] );
-                return ResponderProcessor::sendResult( $this->rai->getId(), $hosted_parser->getError() ); 
+                Log::writeError( $parser->getError()['msg'] );
+                return ResponderProcessor::sendResult( $this->rai->getId(), $parser->getError() ); 
                 
             }
-            
             
             $runtime = [
                         
@@ -70,7 +64,7 @@ class HostedServiceParseTask extends Runnable
             $xml_manager = new XmlManager();
             
             $invocation_result = new InvocationResult();
-            $invocation_result->setArguments( ["xml" => $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime ) ] );
+            $invocation_result->setArguments( ["xml" => $xml_manager->buildXml( $parser->getParsedData(), $runtime ) ] );
             
 //            $xml = $xml_manager->buildXml( $hosted_parser->getParsedData(), $runtime );
 //            file_put_contents("../repo/e3bd3a54-9a07-6160-ff70-a824a9610800/servercode/services/E3BD3A54-9A07-6160-FF70-A824A9610800.xml", $xml);

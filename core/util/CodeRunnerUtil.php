@@ -93,7 +93,31 @@ class CodeRunnerUtil
 
         }
     
-  }
+    }
+    
+    public function deleteHostedModel() {
+        
+        $target = Config::$SERVER_URL . Config::$CORE['delete_hosted_model_link'];
+
+        $http_request = new HttpRequest();
+
+        $http_request->setTargetUrl($target)
+                     ->setHeader( self::$APP_ID_KEY, Config::$APPLICATION_ID )
+                     ->setHeader( self::$SECRET_KEY, Config::$SECRET_KEY )
+                     ->setHeader( self::$VERSION, Config::$APP_VERSION )
+                     ->request( '', $method = 'DELETE' );
+
+        if( $http_request->getResponseCode() != 200 ) {
+
+          $msg = "CodeRunner delete hosted model unsuccessfully, HTTP response code: " . $http_request->getResponseCode() . " response status: " . $http_request->getResponseStatus();  
+
+          Log::writeError($msg, $target='file');
+
+          throw new CodeRunnerException($msg);
+
+        }
+        
+    }
   
     public function deployModel( $model, $hosted = false ) {
         

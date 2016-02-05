@@ -61,5 +61,25 @@ class HostedServiceParser {
         return $hosted_model;
        
     }
+    
+    public function parseModelRAI( $repo_path ) {
+        
+        Log::writeInfo("RAI parsing hosted user code."); 
+
+        if( ! file_exists(  $repo_path) ) {
+            
+          $msg ="Seems, that the class location is wrong. Please, check it and run CodeRunner again.";
+          Log::writeError( $msg ,$target = "console" );
+          throw new CodeRunnerException( $msg );
+          
+        }
+            
+        $parser = new HostedReflectionUtil( $repo_path );
+            
+        $parser->parseFolderWithCustomCode(); 
+            
+        return $parser;
+        
+    }
    
 }
