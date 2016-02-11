@@ -92,7 +92,13 @@ class InvocationTask extends Runnable
                 
                 $result = $arguments; // invokeArgs pass $arguments as link and we get changed data after invoke
                 
-                $reflection_method->invokeArgs( new $instance_class_name(), $result );
+                $returned_result = $reflection_method->invokeArgs( new $instance_class_name(), $result );
+                
+                if( $returned_result !== null ) {
+                    
+                    $result = $returned_result;
+                    
+                }
                 
                 // bootstrap onExit action
                 $backendless_globals->onExit( $instance_class_name, $method, $result );
