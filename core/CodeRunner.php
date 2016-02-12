@@ -396,7 +396,6 @@ class CodeRunner
             $new_file_name = 'model.xml';
 
             file_put_contents( $model_file_path, $this->hosted_model->getJson() );
-            die();
 
         } else {    
             
