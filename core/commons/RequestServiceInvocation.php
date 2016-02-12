@@ -210,6 +210,22 @@ class RequestServiceInvocation extends AbstractRequest
         return $this->invocation_context;
         
     }
+    
+    public function getConfiguration() {
+        
+        if( isset( $this->invocation_context["configurationItems"] ) ) {
+            
+            if( count ( $this->invocation_context["configurationItems"] ) > 0 ) {
+                
+                return $this->invocation_context["configurationItems"];
+                
+            }
+            
+        }
+        
+        return [];
+        
+    }
 
     public function setInvocationContext(  $invocation_context ) {
         

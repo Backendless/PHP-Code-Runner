@@ -133,8 +133,7 @@ class CodeRunnerUtil
                      ->setHeader(self::$SECRET_KEY, Config::$SECRET_KEY)
                      ->setHeader(self::$VERSION, Config::$APP_VERSION)
                      ->setHeader('Content-type', 'application/json')
-                     ->request( ( ! $hosted ) ? $model->getJson() : $model->getXML() );
-                     
+                     ->request( $model->getJson() );
          
         if( $http_request->getResponseCode() != 200 ) {
 

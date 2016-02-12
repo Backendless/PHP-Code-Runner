@@ -12,6 +12,7 @@ use backendless\Backendless;
 use backendless\commons\InvocationContext;
 use backendless\core\commons\holder\HostedModelHolder;
 use backendless\core\util\HostedMapper;
+use ReflectionClass;
 use Exception;
 
 
@@ -69,7 +70,11 @@ class HostedServiceInvocationTask extends Runnable
             
             $reflection_method = new ReflectionMethod( $this->rsi->getClassName(), $this->rsi->getMethod() );
 
-            $result = $reflection_method->invokeArgs( new $instance_class_name(), $arguments );
+            $hosted_instance = new $instance_class_name();
+
+            $this->setConfiguration( $hosted_instance, $this->rsi->getConfiguration() );
+            
+            $result = $reflection_method->invokeArgs( $hosted_instance, $arguments );
 
             $invocation_result = new InvocationResult();
             $hosted_mapper->prepareResult( $result );
@@ -96,6 +101,37 @@ class HostedServiceInvocationTask extends Runnable
         Backendless::switchOnBlMode();
         Backendless::setInvocationContext( $invocation_context );
 
+    }
+    
+    private function setConfiguration( $hosted_instance, $configuration_items ) {
+        
+        //var_dump($configuration_items);
+        $props = (new ReflectionClass( $hosted_instance ) )->getProperties();
+
+        foreach ( $props as $prop ) {
+
+            $prop->setAccessible( true );
+            
+            foreach ( $configuration_items as $conf_key => $conf_item ) {
+            
+                if( $conf_item['name'] == $prop->getName() ) {
+                    
+                    $prop->setValue( $hosted_instance, $conf_item["value"] );
+                
+                    unset( $configuration_items[ $conf_key ] );
+                
+                }
+            }
+            
+        }
+        
+        // set undeclared properties
+        foreach ( $configuration_items as $conf_key => $conf_item ) {
+
+            $hosted_instance->{$conf_item["name"]} = $conf_item["value"];
+
+        }
+        
     }
      
 }

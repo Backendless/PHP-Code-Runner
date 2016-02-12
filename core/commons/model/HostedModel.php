@@ -2,6 +2,7 @@
 namespace backendless\core\commons\model;
 
 use backendless\core\Config;
+use ReflectionClass;
 use backendless\core\util\XmlManager;
 
 class HostedModel
@@ -11,7 +12,19 @@ class HostedModel
     
     private $datatype;
     private $service;
-
+    
+    protected $id;
+    protected $name;
+    protected $description;
+    protected $update_notes;
+    protected $version;
+    protected $is_in_debug;
+    protected $internal_only;
+    protected $free_access_to_api;
+    protected $deployment_scope = "LOCAL";
+    protected $configuration;
+    private   $xml_description;
+    
     public function __construct() {
         
     }
@@ -44,7 +57,8 @@ class HostedModel
         
         $this->service = $parsed_data[ "service" ];
         $this->datatype = $parsed_data[ "datatype" ];
-        
+        $this->xml_description = $this->generateXML();
+    
     }
     
     public function getCountOfEvents() {
@@ -53,7 +67,13 @@ class HostedModel
         
     }
     
-    public function getXML() {
+    public function getXml(){
+        
+        return $this->xml_description;
+        
+    }
+    
+    protected function generateXML() {
         
         $runtime = [
 
@@ -69,6 +89,7 @@ class HostedModel
                    ];
             
         $xml_manager = new XmlManager();
+        
         return $xml_manager->buildXml( [ "service" => $this->service, "datatype"  => $this->datatype ], $runtime );
         
     }
@@ -76,6 +97,60 @@ class HostedModel
     public function __toString() {
 
         return "HostedModel{ hosted service events=" . $this->getCountOfEvents() . ' }';
+        
+    }
+    
+    public function getJson() {
+        
+        $keys_ratio = [
+                            "update_notes"          =>  "updateNotes",
+                            "is_in_debug"           =>  "isInDebug",
+                            "internal_only"         =>  "internalOnly",
+                            "free_access_to_api"    =>  "freeAccessToApi",
+                            "deployment_scope"      =>  "deploymentScope",
+                            "xml_description"       =>  "xmlDescription",
+                      ];
+        
+        $exceptions = [
+                            "application_id",
+                            "app_version_id",
+                            "datatype",
+                            "service",
+                       ];
+        
+        $data_array = [ ];          
+        
+        
+        $reflection = new ReflectionClass( $this );
+        $props = $reflection->getProperties();
+
+        foreach ( $props as $prop ) {
+
+            $prop->setAccessible( true );
+            
+            if ( in_array( $prop->getName(),  $exceptions ) ) {
+                
+                continue;
+                
+            }
+            
+            $json_key = '';
+            
+            if( isset( $keys_ratio[ $prop->getName() ] ) ) {
+                
+                $json_key = $keys_ratio[ $prop->getName() ];
+                
+            } else {
+                
+                $json_key = $prop->getName();
+                
+            }
+            
+            $data_array[ $json_key ] =  $prop->getValue( $this );
+            
+        }
+                    
+        return json_encode( $data_array );        
         
     }
           

@@ -395,7 +395,8 @@ class CodeRunner
             $model_file_path .=  DS . 'hosted' . DS . 'model.xml';
             $new_file_name = 'model.xml';
 
-            file_put_contents( $model_file_path, $this->hosted_model->getXML() );
+            file_put_contents( $model_file_path, $this->hosted_model->getJson() );
+            die();
 
         } else {    
             
