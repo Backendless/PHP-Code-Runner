@@ -106,6 +106,12 @@ class UserService
     
     public function getCurrentUser() {
         
+        return $this->CurrentUser();
+        
+    }
+    
+    public function CurrentUser() {
+        
         if( isset( $this->current_user ) ) {
             
             return $this->current_user;
