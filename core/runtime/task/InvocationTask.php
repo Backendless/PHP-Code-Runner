@@ -1,5 +1,5 @@
 <?php
-namespace backendless\core\runtime;
+namespace backendless\core\runtime\task;
 
 use backendless\core\runtime\concurrent\Runnable;
 use backendless\core\commons\holder\EventDefinitionHolder;
@@ -29,6 +29,8 @@ class InvocationTask extends Runnable
     private $event_handler;
     
     public function __construct( $rmi, $event_handler ) {
+
+        parent::__construct();
 
         $this->rmi = $rmi;
         $this->event_handler = $event_handler;

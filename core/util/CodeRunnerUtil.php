@@ -5,8 +5,6 @@ use backendless\core\Config;
 use backendless\core\commons\exception\CodeRunnerException;
 use backendless\core\lib\HttpRequest;
 use backendless\core\lib\Log;
-use ReflectionClass;
-use ReflectionProperty;
 
 
 class CodeRunnerUtil
@@ -60,9 +58,6 @@ class CodeRunnerUtil
             
             Config::$DEBUG_ID = json_decode($http_request->getResponce(), true)['debugId'];
             
-            // TODO: delete after test
-            //Config::$DEBUG_ID = "51591778-2B61-B82F-FF33-B7B5F460FD00:8C902CEE-643E-C017-FF7D-C05ACC97C600:CodeRunnerDebug-TEST-DIMA";
-            
             if( !isset( Config::$DEBUG_ID )  ) {
                 
                 $msg = "CodeRunner can't get  debugid.";
@@ -98,11 +93,38 @@ class CodeRunnerUtil
 
         }
     
-  }
+    }
+    
+    public function deleteHostedModel() {
+        
+        $target = Config::$SERVER_URL . Config::$CORE['delete_hosted_model_link'];
+
+        $http_request = new HttpRequest();
+
+        $http_request->setTargetUrl($target)
+                     ->setHeader( self::$APP_ID_KEY, Config::$APPLICATION_ID )
+                     ->setHeader( self::$SECRET_KEY, Config::$SECRET_KEY )
+                     ->setHeader( self::$VERSION, Config::$APP_VERSION )
+                     ->request( '', $method = 'DELETE' );
+
+        if( $http_request->getResponseCode() != 200 ) {
+
+          $msg = "CodeRunner delete hosted model unsuccessfully, HTTP response code: " . $http_request->getResponseCode() . " response status: " . $http_request->getResponseStatus();  
+
+          Log::writeError($msg, $target='file');
+
+          throw new CodeRunnerException($msg);
+
+        }
+        
+    }
   
-    public function deployModel( $model ) {
-          
-        $target = Config::$SERVER_URL . Config::$CORE['register_model_link'];
+    public function deployModel( $model, $hosted = false ) {
+        
+        $target = Config::$SERVER_URL;
+        $target .= ( ! $hosted ) ? Config::$CORE['register_model_link'] : Config::$CORE['register_hosted_model_link'];
+        
+        if( $hosted ==true ){ $target = "http://test.loc/codeRunnerDriver.php"; } //TODO: delete line of code
 
         $http_request = new HttpRequest();
         
@@ -111,8 +133,7 @@ class CodeRunnerUtil
                      ->setHeader(self::$SECRET_KEY, Config::$SECRET_KEY)
                      ->setHeader(self::$VERSION, Config::$APP_VERSION)
                      ->setHeader('Content-type', 'application/json')
-                     ->request( $model->getJson()  );
-                     
+                     ->request( $model->getJson() );
          
         if( $http_request->getResponseCode() != 200 ) {
 
@@ -125,11 +146,14 @@ class CodeRunnerUtil
         }
 
     }
-
-    public function publish( $code_zip_path ) {
+    
+    public function publish( $code_zip_path, $hosted = false ) {
         
-        $target = Config::$SERVER_URL . Config::$CORE['publish_code'] . "/" . Config::$CORE['lang'];
+        $target = Config::$SERVER_URL;
+        $target .= ( ! $hosted ) ? Config::$CORE['publish_code'] . "/" . Config::$CORE['lang'] : Config::$CORE['hosted_publish_code'] . "/" . Config::$CORE['lang'];
 
+        if( $hosted ==true ){ $target = "http://test.loc/codeRunnerDriver.php"; } //TODO: delete line of code
+         
         $http_request = new HttpRequest();
 
         $multipart_boundary ="------BackendlessFormBoundary" . md5(uniqid()) . microtime(true);
@@ -161,19 +185,6 @@ class CodeRunnerUtil
         }
         
   }
-
-    public function downloadServerCodeFile( $applicationId, $appVersionId, $type ) {
-        
-//        WebTarget target = client.target( Config.SERVER_URL ).path( "/servercode/" + type + "/" + appVersionId + "/" + Lang.JAVA );
-//        Response response = target.request().header( APP_ID_KEY, applicationId ).get();
-//        if( response.getStatus() != 200 )
-//        {
-//          throw new CodeRunnerException( "Can not download file from url: " + target.getUri().toString() );
-//        }
-//        return response.readEntity( File.class );
-//      }
-//
-    }    
 
     public function getExternalHost() {
         

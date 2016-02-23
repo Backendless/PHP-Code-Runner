@@ -1,6 +1,8 @@
 <?php
 namespace backendless\core\servercode;
 
+use backendless\core\Config;
+
 
 class RunnerContext 
 {
@@ -112,7 +114,7 @@ class RunnerContext
     
     public function getConvertedToArray(){
         
-        $properties =  ["___jsonclass" => "com.backendless.servercode.RunnerContext"];
+        $properties =  ["___jsonclass" => Config::$CORE["runner_context"] ];
         
         return array_merge( $properties, get_object_vars($this) );
         

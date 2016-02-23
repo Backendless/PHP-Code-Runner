@@ -10,7 +10,6 @@ use backendless\core\util\ReflectionUtil;
 use backendless\core\commons\holder\EventDefinitionHolder;
 use backendless\core\holder\CodeExecutorHolder;
 use backendless\core\util\PathBuilder;
-use backendless\core\util\ClassManager;
 use ReflectionClass;
 use ReflectionMethod;
 

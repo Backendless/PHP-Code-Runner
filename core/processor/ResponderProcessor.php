@@ -59,9 +59,10 @@ class ResponderProcessor
         
         $result = array_shift( self::$results_queue );
             
-            if( $result === null ) {
+        if( $result === null ) {
                 
-                return;
+            return;
+            
         }
 
         $http_request = new HttpRequest();
@@ -70,8 +71,17 @@ class ResponderProcessor
                                                        . 'coderunnerId=' . Config::$CORE['processing_coderunnerId'] . ''
                                                        . '&requestId=' . Config::$CORE['processing_requestId'] . ''
                                                        . '&lang=PHP';
+        $result_data = '';
         
-        $result_data = json_encode( $result['result']->getConvertedToArray() );
+        if( is_object( $result['result'] ) ) {
+            
+            $result_data = json_encode( $result['result']->getConvertedToArray() );
+            
+        } else {
+            
+            $result_data = json_encode($result['result']);
+            
+        }
         
         $http_request->setTargetUrl( $target )
                      ->setHeader('Content-type', 'application/json')

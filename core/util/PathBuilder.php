@@ -63,5 +63,18 @@ class PathBuilder
         }
         
     }
+    
+    public static function getHostedService( $app_version_id, $relative_path = null ) {
+        
+        // only for CLOUD mode
+        $repo_path = rtrim( Config::$REPO_PATH, "/" );
+
+        $path = realpath( getcwd() . DS . $repo_path) . DS . strtolower( $app_version_id ) . DS . $relative_path . DS . strtolower( $app_version_id );
+        
+        Log::writeInfo( "Build path to hosted code : " . $path , "file" );
+
+        return $path;
+            
+    }
 
 }

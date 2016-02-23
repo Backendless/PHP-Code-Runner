@@ -6,6 +6,7 @@ use backendless\core\util\ClassManager;
 use ReflectionClass;
 use backendless\core\util\ReflectionUtil;
 use backendless\core\servercode\ExecutionResult;
+use backendless\core\Config;
 
 
 class PersistenceAdapter
@@ -56,7 +57,7 @@ class PersistenceAdapter
             
             if( isset( $arg_val["___jsonclass"]) ) {
                 
-                if( $arg_val["___jsonclass"] == "com.backendless.servercode.ExecutionResult") {
+                if( $arg_val["___jsonclass"] == Config::$CORE["execution_result"] ) {
                     
                     $execution_result = new ExecutionResult();
                     $execution_result->setException( $arguments[$arg_index]["exception"] );

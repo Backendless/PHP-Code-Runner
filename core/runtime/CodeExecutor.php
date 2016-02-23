@@ -5,7 +5,9 @@ use backendless\core\lib\Log;
 use backendless\core\parser\EventModelParser;
 use backendless\core\Config;
 use backendless\core\GlobalState;
-use backendless\core\runtime\InvocationTask;
+use backendless\core\runtime\task\InvocationTask;
+use backendless\core\runtime\task\HostedServiceParseTask;    
+use backendless\core\runtime\task\HostedServiceInvocationTask;
 
 
 class CodeExecutor
@@ -22,7 +24,7 @@ class CodeExecutor
         
     }
 
-    public function invoke( $rmi ) { 
+    public function invokeMethod( $rmi ) { 
        
         if( $rmi->getEventId() == Config::$CORE['shutdown_code'] && GlobalState::$TYPE == 'LOCAL' ) {
 
@@ -37,7 +39,7 @@ class CodeExecutor
             return;
             
         }
-
+        
         $event_handler = $this->event_handlers_model->getEventHandler( $rmi->getEventid(), $rmi->getTarget() );
 
         $invocation_task = new InvocationTask(  $rmi, $event_handler );
@@ -45,12 +47,34 @@ class CodeExecutor
         $invocation_task->runImpl();
        
     }
+    
+    public function invokeAction( $rai ) {
+        
+        switch ( $rai->getActionType() ) {
+            
+            case 'PARSE_CUSTOM_SERVICE_FROM_JAR': 
+                                                    $invocation_task = new HostedServiceParseTask( $rai );
+                                                    $invocation_task->runImpl();
+                                                    break;    
+            
+            default : Log::writeError("Can't define action type of received RequestActionInvocation", $target = "all");
+            
+        }
+
+  }
+  
+   public function invokeService( $rsi ) {
+       
+        $invocation_task = new HostedServiceInvocationTask( $rsi );
+        $invocation_task->runImpl();
+
+  }
 
     public function init() {
 
-        if($this->event_handlers_model == null ) {
+        if( $this->event_handlers_model == null ) {
             
-          $this->initEventModel();
+            $this->initEventModel();
           
         }
         
