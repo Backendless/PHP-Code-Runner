@@ -62,7 +62,7 @@ class InvocationResult
     public function getConvertedToArray() {
         
         $data = ["___jsonclass" => Config::$CORE["invocation_result"] ];
-        $data['arguments'] = $this->encode( json_encode( $this->arguments) );
+        $data['arguments'] = $this->encode( json_encode( $this->arguments ) );
         $data['exception'] = $this->exeption;
         
         return $data;

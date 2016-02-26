@@ -9,11 +9,44 @@ class BlConfigurationItemDescription
   private $type;
   private $default_value;
   private $required;
+  private $tooltip;
   
   private $options;
   private $hint;
   private $local_service_version;
   private $order = 0;
+  
+  public function __construct( $props, $name, $default_value ) {
+      
+      $this->name = $name;
+      
+      $this->display_name = ( isset( $props["displayName"] ) ) ? $props["displayName"] : "";
+      $this->tooltip      = ( isset( $props["tooltip"] ) ) ? $props["tooltip"] : "";
+      $this->required     = ( isset( $props["required"] ) ) ? false : "";
+      $this->options      = ( isset( $props["options"] ) ) ? $props["options"] : [];
+      $this->order        = ( isset( $props["order"] ) ) ? $props["options"] : -1;
+      
+      $this->default_value = ( !empty( $default_value ) ) ? $default_value : null;
+      
+      
+  }
+  
+  public function getAsArray() {
+      
+      $data_array = [];
+      
+      $data_array["name"]           = $this->name;
+      $data_array["displayName"]    = $this->display_name;
+      $data_array["tooltip"]        = $this->tooltip;
+      $data_array["required"]       = $this->required;
+      $data_array["options"]        = $this->options;
+      $data_array["order"]          = $this->order;
+      
+      $data_array["defaultValue"]   = $this->default_value;
+      
+      return $data_array;
+      
+  }
   
   public function setName( $name ) {
   

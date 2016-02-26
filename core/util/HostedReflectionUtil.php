@@ -1,6 +1,7 @@
 <?php
 namespace backendless\core\util;
 
+use backendless\core\commons\model\BlConfigurationItemDescription;
 use backendless\core\parser\typeparser\DefaultTypeParser;
 use backendless\core\commons\exception\CodeRunnerException;
 use backendless\core\util\TypeManager;
@@ -30,7 +31,7 @@ class HostedReflectionUtil {
     protected $used_classes;
     
     protected $path = null;
-    //protected $rai_id;
+    protected $config = [];
    
     protected $type_parser;
     
@@ -247,6 +248,8 @@ class HostedReflectionUtil {
         
         }
         
+        $this->parseConfig( $interface_implementation["class_description"] );
+        
         $this->interface_implementation = $interface_implementation;
         
     }
@@ -303,6 +306,43 @@ class HostedReflectionUtil {
 //  private function parseAnnotation( ){
 //        
 //  }
+    
+    private function parseConfig( &$class_description ) {
+        
+        $props = ( new ReflectionClass( $class_description[ 'fullname' ] ) )->getProperties();
+        
+        $instance = new $class_description[ 'fullname' ];
+        
+        foreach ( $props as $prop ) {
+            
+            $php_doc = $prop->getDocComment();
+            
+            $matches = [];
+            
+            if( preg_match( '/(.*)?@BackendlessConfig(.*)({.*})(.*)?/', $php_doc , $matches ) ){
+                
+                $prop->setAccessible( true );
+                $this->config[ ] = new BlConfigurationItemDescription( json_decode( $matches[ 3 ], true ), $prop->getName(), $prop->getValue( $instance ) );
+
+            }
+            
+        }
+        
+    }
+    
+    public function getConfigListAsArray() {
+        
+        $list = [];
+        
+        foreach ( $this->config as $conf_item ) {
+            
+            $list[] = $conf_item->getAsArray(); 
+            
+        }
+        
+        return $list;
+        
+    }
     
     public function getError() {
         

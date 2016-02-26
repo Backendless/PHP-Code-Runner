@@ -392,11 +392,11 @@ class CodeRunner
         
         if( $hosted ) {
             
-            $model_file_path .=  DS . 'hosted' . DS . 'model.xml';
-            $new_file_name = 'model.xml';
+            $model_file_path .=  DS . 'hosted' . DS . 'model.json';
+            $new_file_name = 'model.json';
 
             file_put_contents( $model_file_path, $this->hosted_model->getJson() );
-
+            
         } else {    
             
             $model_file_path .=  DS . 'events' . DS . 'model.json';
