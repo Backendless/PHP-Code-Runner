@@ -28,6 +28,18 @@ class BlConfigurationItemDescription
       
       $this->default_value = ( !empty( $default_value ) ) ? $default_value : null;
       
+      $this->type = "STRING";
+      
+      if( isset( $this->options) ) {
+          
+          $this->type = "CHOICE";
+          
+      }
+      
+//  DATE( 2 ), ?
+//  BOOL( 3 ), ?
+//  CHOICE( 4 ); ?
+      
       
   }
   
@@ -41,6 +53,7 @@ class BlConfigurationItemDescription
       $data_array["required"]       = $this->required;
       $data_array["options"]        = $this->options;
       $data_array["order"]          = $this->order;
+      $data_array["type"]          = $this->type;
       
       $data_array["defaultValue"]   = $this->default_value;
       
