@@ -116,6 +116,7 @@ class HostedModel
                             "app_version_id",
                             "datatype",
                             "service",
+                            "is_in_debug",
                        ];
         
         $data_array = [ ];          
