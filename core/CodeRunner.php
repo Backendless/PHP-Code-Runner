@@ -215,22 +215,25 @@ class CodeRunner
         
         if( !Config::$AUTO_PUBLISH ) {
             
-            Log::writeInfo( "Deploying models to server, and starting debug..." );
+            Log::writeInfo( "Deploying model to server, and starting debug..." );
+            //Log::writeInfo( "Deploying models to server, and starting debug..." );
             
         }else{
             
-            Log::writeInfo( "Deploying models to server..." );
+            Log::writeInfo( "Deploying model to server..." );
+            //Log::writeInfo( "Deploying models to server..." );
             
         }
         
         try {
             
             CodeRunnerUtil::getInstance()->deployModel( $this->event_handlers_model );
-            CodeRunnerUtil::getInstance()->deployModel( $this->hosted_model, true );
+            //CodeRunnerUtil::getInstance()->deployModel( $this->hosted_model, true );
     
             ExternalHostHolder::getInstance()->setUrls( Config::$APPLICATION_ID, CodeRunnerUtil::getInstance()->getExternalHost() );
             
-            Log::writeInfo( "Models successfully deployed..." );
+            //Log::writeInfo( "Models successfully deployed..." );
+            Log::writeInfo( "Model successfully deployed..." );
             
             if( !Config::$AUTO_PUBLISH ) {
                 
@@ -240,14 +243,16 @@ class CodeRunner
             
         } catch( CodeRunnerException $e ) {
 
-           Log::writeError( "Models deploying failed..." ); 
+           //Log::writeError( "Models deploying failed..." ); 
+            Log::writeError( "Model deploying failed..." ); 
            Log::writeError( $e->getMessage(), $target = 'file' );
            self::Stop();
             
             
         } catch( Exception $e ) {
             
-          Log::writeError( "Models deploying failed..." );
+          Log::writeError( "Model deploying failed..." );
+//          Log::writeError( "Models deploying failed..." );
           Log::writeError( $e->getMessage(), $target = 'file' );
           self::Stop();
           
@@ -424,7 +429,7 @@ class CodeRunner
         if( Config::$AUTO_PUBLISH ) {
             
             $this->publishCode();
-            $this->publishCode( $hosted = true );
+            //$this->publishCode( $hosted = true );
             $this->removeTmpFolder();
             Log::writeInfo( "CodeRunner will shutdown now." );
             exit(0);
@@ -447,12 +452,12 @@ class CodeRunner
         
         Log::writeInfo( "Build successfully event model: " . $this->event_handlers_model );
         
-        $this->hosted_model = HostedServiceParser::getInstance()->parseDebugModel();
+        //$this->hosted_model = HostedServiceParser::getInstance()->parseDebugModel();
         
-        HostedModelHolder::setModel( $this->hosted_model );
-        HostedModelHolder::setXMLModel( $this->hosted_model->getXML() );
+//        HostedModelHolder::setModel( $this->hosted_model );
+//        HostedModelHolder::setXMLModel( $this->hosted_model->getXML() );
         
-        Log::writeInfo( "Build successfully hosted model: " . $this->hosted_model );
+//        Log::writeInfo( "Build successfully hosted model: " . $this->hosted_model );
         
     }
     
