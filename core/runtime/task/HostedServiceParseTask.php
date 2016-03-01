@@ -39,7 +39,7 @@ class HostedServiceParseTask extends Runnable
             
             $path_to_hosted = PathBuilder::getHostedService( $this->rai->getAppVersionId(), $this->rai->getRelativePath() );
             
-            $parser = HostedServiceParser::getInstance()->parseModelRAI( $path_to_hosted ); 
+            $parser = HostedServiceParser::getInstance()->parseModelRAI( $path_to_hosted, $this->rai->getId() ); 
 
             if( $parser->isError() ) {
                 

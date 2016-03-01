@@ -447,7 +447,7 @@ class CodeRunner
         
         Log::writeInfo( "Build successfully event model: " . $this->event_handlers_model );
         
-        $this->hosted_model =  HostedServiceParser::getInstance()->parseDebugModel();
+        $this->hosted_model = HostedServiceParser::getInstance()->parseDebugModel();
         
         HostedModelHolder::setModel( $this->hosted_model );
         HostedModelHolder::setXMLModel( $this->hosted_model->getXML() );

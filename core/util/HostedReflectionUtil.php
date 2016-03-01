@@ -4,6 +4,8 @@ namespace backendless\core\util;
 use backendless\core\commons\model\BlConfigurationItemDescription;
 use backendless\core\parser\typeparser\DefaultTypeParser;
 use backendless\core\commons\exception\CodeRunnerException;
+use backendless\core\GlobalState;
+use backendless\core\processor\ResponderProcessor;
 use backendless\core\util\TypeManager;
 use backendless\core\Config;
 use RecursiveIteratorIterator;
@@ -35,7 +37,7 @@ class HostedReflectionUtil {
    
     protected $type_parser;
     
-    public function __construct( $path = null /*, $rai_id = null*/ ) {
+    public function __construct( $path = null, $rai_id = null ) {
 
         $this->base_interface_name = Config::$CORE["hosted_interface_name"];
         $this->interface_implementation_info = null;
@@ -46,7 +48,7 @@ class HostedReflectionUtil {
         $this->used_classes = [];
 
         $this->path = $path;
-        //$this->rai_id = $rai_id;
+        $this->rai_id = $rai_id;
         
         $this->type_parser = new DefaultTypeParser();
         
@@ -222,8 +224,7 @@ class HostedReflectionUtil {
 
             if( $this->type_parser->isError() ) {
 
-                //ResponderProcessor::sendResult( $this->rai_id, $this->type_parser->getError() );
-                throw new Exception( $this->type_parser->getError()["msg"] );
+                $this->handleError( $this->type_parser->getError() );
 
             }
         
@@ -243,8 +244,7 @@ class HostedReflectionUtil {
                 
             }
                         
-            //ResponderProcessor::sendResult( $this->rai_id, $error );
-            throw new Exception( $error["msg"] );
+            $this->handleError( $error );
         
         }
         
@@ -288,9 +288,8 @@ class HostedReflectionUtil {
         
         if( $this->type_parser->isError() ) {
 
-                //ResponderProcessor::sendResult( $this->rai_id, $this->type_parser->getError() );
-                throw new Exception( $this->type_parser->getError()["msg"] );
-
+            $this->handleError( $this->type_parser->getError() );
+                
         }
         
         $this->classes_holder[] = $class_description;
@@ -323,6 +322,12 @@ class HostedReflectionUtil {
                 
                 $prop->setAccessible( true );
                 $this->config[ ] = new BlConfigurationItemDescription( json_decode( $matches[ 3 ], true ), $prop->getName(), $prop->getValue( $instance ) );
+                
+                if( json_last_error() != 0 ) {
+                    
+                    $this->handleError( $error = [ "msg" => "Invalid configuration JSON: '" . $matches[ 3 ] . "'", "code" => ''  ] );
+                    
+                }
 
             }
             
@@ -400,6 +405,18 @@ class HostedReflectionUtil {
             
         }        
         
+    }
+    
+    private function handleError( $error ) {
+        
+        if ( GlobalState::$TYPE == 'CLOUD' ) {
+
+            ResponderProcessor::sendResult( $this->rai_id, $error );
+
+        }
+
+        throw new CodeRunnerException( $error["msg"] );
+            
     }
     
 }

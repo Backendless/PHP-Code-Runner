@@ -30,16 +30,29 @@ class BlConfigurationItemDescription
       
       $this->type = "STRING";
       
-      if( isset( $this->options) ) {
+      if( count( $this->options ) > 0 ) {
           
           $this->type = "CHOICE";
           
       }
       
-//  DATE( 2 ), ?
-//  BOOL( 3 ), ?
-//  CHOICE( 4 ); ?
+      if( $this->default_value === true || $this->default_value === false ) {
+          
+          $this->type = "BOOL";
+          
+      }
       
+      if( is_string( $this->default_value ) ) {
+          
+        if( strtotime( $this->default_value ) != false ) {
+
+            $this->default_value = strtotime( $this->default_value ) * 1000;
+            $this->type = "DATE";
+
+
+        }
+        
+      }
       
   }
   
