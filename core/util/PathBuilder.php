@@ -4,6 +4,7 @@ namespace backendless\core\util;
 use backendless\core\Config;
 use backendless\core\lib\Log;
 use backendless\core\GlobalState;
+use Exception;
 
 class PathBuilder
 {
@@ -43,8 +44,25 @@ class PathBuilder
     protected static function buildPathToProductionResources() {
         
         $repo_path = rtrim( Config::$REPO_PATH, "/" );
-                
-        self::$production_resources_path = realpath( getcwd() . DS . $repo_path ) . DS . strtolower(Config::$TASK_APPLICATION_ID) . DS . Config::$RELATIVE_PATH;
+        
+        if( $repo_path[ 0 ] == DS ) {
+            
+            self::$production_resources_path = $repo_path; 
+            
+        } else {
+            
+            self::$production_resources_path = realpath( getcwd() . DS . $repo_path ); 
+            
+        }
+        
+        self::$production_resources_path .=  DS . strtolower ( Config::$TASK_APPLICATION_ID ) . DS . Config::$RELATIVE_PATH;
+        
+        if( !file_exists( self::$production_resources_path ) ) {
+            
+            throw new Exception( "Invalid path to 'classes' folder: '" .self::$production_resources_path ."'"  );
+        
+        }
+            
         
         Log::writeInfo( "Build path to production resources : " . self::$production_resources_path, "file" );
         
