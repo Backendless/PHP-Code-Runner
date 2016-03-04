@@ -8,6 +8,8 @@ use backendless\core\runtime\adapter\PersistenceAdapter;
 use backendless\core\runtime\adapter\UserAdapter;
 use backendless\core\runtime\adapter\MessagingAdapter;
 use backendless\core\runtime\adapter\CustomHandlerAdapter;
+use backendless\core\runtime\adapter\FilesAdapter;
+use backendless\core\runtime\adapter\GeoAdapter;
 use backendless\core\processor\ResponderProcessor;
 use backendless\core\commons\InvocationResult;
 use backendless\core\util\ClassManager;
@@ -44,6 +46,8 @@ class InvocationTask extends Runnable
         self::$argument_adapter_list->registerAdapter( new UserAdapter() );
         self::$argument_adapter_list->registerAdapter( new MessagingAdapter() );
         self::$argument_adapter_list->registerAdapter( new CustomHandlerAdapter() );
+        self::$argument_adapter_list->registerAdapter( new FilesAdapter() );
+        self::$argument_adapter_list->registerAdapter( new GeoAdapter() );
         
     }
 
