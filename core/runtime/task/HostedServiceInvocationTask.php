@@ -105,7 +105,6 @@ class HostedServiceInvocationTask extends Runnable
     
     private function setConfiguration( $hosted_instance, $configuration_items ) {
         
-        //var_dump($configuration_items);
         $props = (new ReflectionClass( $hosted_instance ) )->getProperties();
 
         foreach ( $props as $prop ) {

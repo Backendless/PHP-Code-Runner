@@ -13,6 +13,7 @@ use backendless\core\runtime\adapter\GeoAdapter;
 use backendless\core\processor\ResponderProcessor;
 use backendless\core\commons\InvocationResult;
 use backendless\core\util\ClassManager;
+use backendless\core\commons\InitAppData;
 use backendless\exception\BackendlessException;
 use backendless\core\lib\Log;
 use backendless\Backendless;
@@ -65,6 +66,8 @@ class InvocationTask extends Runnable
         $invocation_result = new InvocationResult();
         
         try {
+            
+                $this->initSdk();
             
                 $definition = self::$event_definition_holder->getDefinitionById( $this->rmi->getEventId() );
                 
@@ -176,7 +179,16 @@ class InvocationTask extends Runnable
         return null;
         
     }
-
+    
+    private function initSdk() {
+        
+        $init_app_data = new InitAppData( $this->rmi->getInitAppData() );
+        
+        Backendless::setUrl( $init_app_data->getUrl() );
+        Backendless::initApp( $this->rmi->getApplicationId(), $init_app_data->getSecretKey(),  $init_app_data->getAppVersionName() );
+        Backendless::switchOnBlMode();
+        
+    }
 
     public function __toString() {
 
