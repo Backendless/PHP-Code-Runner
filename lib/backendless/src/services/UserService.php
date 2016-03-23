@@ -75,7 +75,7 @@ class UserService
             
         } else {
        
-            $user->putProperties( RequestBuilder::doRequest( 'users', $user->getUserId(), $user->exclude("user-token")->getProperties(), 'PUT' ) );
+            $user->putProperties( RequestBuilder::doRequest( 'users', $user->getUserId(), $user->getProperties(), 'PUT' ) );
         
             return $user;
         }
@@ -123,7 +123,7 @@ class UserService
     }
     
     public function setCurrentUser( $user ) {
-                
+        
         if ( is_a( $user, '\backendless\model\BackendlessUser' ) ) {
             
             $this->current_user = $user;
@@ -149,7 +149,7 @@ class UserService
         
         if( $user->getPassword() == null || $user->getPassword() == '' ) {
             
-            throw new Exeption("User password cannot be null or empty.");
+            throw new BackendlessException("User password cannot be null or empty.");
             
         }
         
@@ -159,7 +159,7 @@ class UserService
         
         if( $user == null ) {
             
-            throw new Exeption("User cannot be null or empty.");
+            throw new BackendlessException("User cannot be null or empty.");
             
         }
         

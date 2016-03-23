@@ -6,9 +6,10 @@ abstract class AbstractRequest
     protected $id;
     protected $application_id;
     protected $app_version_id;    
-    protected $timestamp;
+    protected $init_app_data;
+    protected $timestamp;    
     protected $timeout = 5000;
-    protected $relative_path;
+    protected $relative_path;    
   
     public function __construct() {
 
@@ -50,21 +51,21 @@ abstract class AbstractRequest
 
     public function setAppVersionId( $app_version_id ) {
     
-      $this->app_version_id = $app_version_id;
-      return $this;
+        $this->app_version_id = $app_version_id;
+        return $this;
       
     }
 
     public function getTimestamp() {
     
-      return $this->timestamp;
+        return $this->timestamp;
       
     }
 
     public function setTimestamp( $timestamp ) {
     
-      $this->timestamp = $timestamp;
-      return $this;
+        $this->timestamp = $timestamp;
+        return $this;
       
     }
     
@@ -92,6 +93,19 @@ abstract class AbstractRequest
         $this->relative_path = $relative_path;
         return $this;
       
+    }
+    
+    public function setInitAppData( $init_app_data ) {
+        
+        $this->init_app_data = $init_app_data;
+        return $this;
+        
+    }
+    
+    public function getInitAppData( ) {
+        
+        return $this->init_app_data;
+        
     }
   
 }

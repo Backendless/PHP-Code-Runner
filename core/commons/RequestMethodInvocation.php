@@ -15,15 +15,16 @@ class RequestMethodInvocation extends AbstractRequest
         
         parent::__construct();
 
-        $this->setId( $msg['id'] )
-             ->setApplicationId( $msg['applicationId'] )
-             ->setAppVersionId( $msg['appVersionId'] )   
-             ->setEventId( $msg['eventId']  )
-             ->setArguments( $msg['arguments'] )
-             ->setTarget( $msg['target'] )   
-             ->setTimeout( $msg['timeout'] )
-             ->setAsync( $msg['async'] )
-             ->setRelativePath( $msg['relativePath'] );   
+        $this->setId( $msg[ 'id' ] )
+             ->setApplicationId( $msg[ 'applicationId' ] )
+             ->setAppVersionId( $msg[ 'appVersionId' ] )   
+             ->setEventId( $msg[ 'eventId' ]  )
+             ->setArguments( $msg[ 'arguments' ] )
+             ->setInitAppData( $msg[ 'initAppData' ] )
+             ->setTarget( $msg[ 'target' ] )   
+             ->setTimeout( $msg[ 'timeout' ] )
+             ->setAsync( $msg[ 'async' ] )
+             ->setRelativePath( $msg[ 'relativePath' ] );   
         
         $this->decoded_arguments = null;
         
@@ -54,7 +55,7 @@ class RequestMethodInvocation extends AbstractRequest
         
             $argumenst_decoded_string = '';
 
-            foreach ($this->arguments as $code ) {
+            foreach ( $this->arguments as $code ) {
 
                 $argumenst_decoded_string .= chr($code); //ASC||
                 //$argumenst_decoded_string .= iconv( 'UCS-4LE', 'UTF-8', pack('V', $code) );

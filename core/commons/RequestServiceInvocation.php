@@ -13,10 +13,9 @@ class RequestServiceInvocation extends AbstractRequest
     private $file_type;
     private $class_name;
     private $method;
-    private $init_app_data;
+    private $arguments;
     private $invocation_context;
     private $properies;
-    private $arguments;
     private $lang;
     private $decoded_arguments;
 
@@ -24,22 +23,22 @@ class RequestServiceInvocation extends AbstractRequest
 
         parent::__construct();
         
-        $this->setAppVersionId( $msg['appVersionId'] )
-             ->setMethod( $msg['method'] )
-             ->setServiceVersionId( $msg['serviceVersionId'] )
-             ->setClassName( $msg['className']  )
-             ->setTimeout( $msg['timeout'] )
-             ->setInitAppData( $msg['initAppData'] )
-             ->setInvocationContext( $msg['invocationContextDto'] )
-             ->setRelativePath( $msg['relativePath'] )   
-             ->setArguments( $msg['arguments'] )
-             ->setId( $msg['id'] )
-             ->setApplicationId( $msg['applicationId'] )
-             ->setLang( $msg['lang'] )
-             ->setServiceId( $msg['serviceId'] )
-             ->setFileType( $msg['fileType'] )
-             ->setProperties( $msg['properties'] )
-             ->setTimestamp( $msg['timestamp'] );
+        $this->setAppVersionId( $msg[ 'appVersionId' ] )
+             ->setMethod( $msg[ 'method' ] )
+             ->setServiceVersionId( $msg[ 'serviceVersionId' ] )
+             ->setClassName( $msg[ 'className' ]  )
+             ->setTimeout( $msg[ 'timeout' ] )
+             ->setInitAppData( $msg[ 'initAppData' ] )
+             ->setInvocationContext( $msg[ 'invocationContextDto' ] )
+             ->setRelativePath( $msg[ 'relativePath' ] )   
+             ->setArguments( $msg[ 'arguments' ] )
+             ->setId( $msg[ 'id' ] )
+             ->setApplicationId( $msg[ 'applicationId' ] )
+             ->setLang( $msg[ 'lang' ] )
+             ->setServiceId( $msg[ 'serviceId' ] )
+             ->setFileType( $msg[ 'fileType' ] )
+             ->setProperties( $msg[ 'properties' ] )
+             ->setTimestamp( $msg[ 'timestamp' ] );
         
         $this->decoded_arguments = null;
         
