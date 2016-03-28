@@ -20,7 +20,7 @@ class ClassManager
     
     public static function analyze( $path_to_folder, $map_calsses = true ) { 
         
-        Log::writeInfo( "ClassManager start analyze classes", "file" );
+        //Log::writeInfo( "ClassManager start analyze classes", "file" );
         
         if( $path_to_folder == false) { 
             
@@ -71,7 +71,7 @@ class ClassManager
             
         }
         
-        Log::writeInfo( "ClassManager finished analyze classes", "file" );
+        //Log::writeInfo( "ClassManager finished analyze classes", "file" );
         
     }
     

@@ -19,9 +19,9 @@ class  CodeRunnerLoader
 
         self::phpEnviromentInit();
         
-        Log::init( Config::$CORE['os_type'], GlobalState::$TYPE, Config::$CORE['logging_in_cloud_mode'] );
+        Log::init( GlobalState::$TYPE, Config::$CORE['logging_in_cloud_mode'], Config::$CORE['os_type'] );
         
-        Log::writeInfo("Start CodeRunner.", $target = 'file');
+        Log::writeInfo("Start CodeRunner", $target = 'file');
         
         EventDefinitionHolder::getInstance()->load();
         
@@ -254,7 +254,7 @@ class  CodeRunnerLoader
         
         if ( GlobalState::$TYPE === 'LOCAL' ) {
         
-             //for LOCAL use user time zone or UTC if not set
+             //for LOCAL use time zone or UTC if not set
              $timezone = @date_default_timezone_get(); // if not set default timezone set as UTC
              
              if( $timezone == 'UTC') {

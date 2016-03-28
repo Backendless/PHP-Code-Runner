@@ -1,6 +1,8 @@
 <?php
 namespace backendless\core\lib;
 
+use DateTime;
+
 
 class Log {
     
@@ -9,16 +11,16 @@ class Log {
     protected static $is_colored_glob = true;
     
     protected static $log_path;
-
     protected static $is_write = true;
+    protected static $redirect_to_stdout = false;    
     
     protected static $colors = [ 'blue' => '0;34', 'yellow' => '1;33', 'red' => '0;31' ];
     
-    public static function init( $os_type = '', $mode, $is_debug ) {
+    public static function init( $mode, $is_debug, $os_type = '' ) {
         
         self::$log_path =  BP . DS . self::$app_log_dir ;
         
-        if( !file_exists( self::$log_path ) ) {
+        if( ! file_exists( self::$log_path ) ) {
             
             mkdir( self::$log_path );
             
@@ -32,39 +34,46 @@ class Log {
         
         if( $mode == 'CLOUD' && $is_debug == false ) {
             
-            self::$is_write = false;
+            self::$is_write = false;  // in cloud mode do not write log if debug mode switch off
             
         }
+        
+        if( $mode == 'CLOUD' && $is_debug == true ) {
+            
+            self::$redirect_to_stdout = true; //if in  cloud mode switch on  debug mode write all log to stdout
+            
+        }
+        
         
     }
 
     public static function write( $msg, $target = 'all', $colored = true ) {
         
-        self::doWrite( $msg, $target, "\r", $colored, 'none');
+        self::doWrite( $msg, $target, "\r", $colored, 'none' );
                           
     }
     
     public static function writeInfo( $msg, $target = 'all', $colored = true ) {
         
-        self::doWrite( $msg, $target, "[INFO]", $colored, 'blue');
+        self::doWrite( $msg, $target, "[INFO]", $colored, 'blue' );
                           
     }
     
     public static function writeWarn( $msg, $target = 'all', $colored = true ) {
         
-        self::doWrite( $msg, $target, "[WARN]", $colored, 'yellow');
+        self::doWrite( $msg, $target, "[WARN]", $colored, 'yellow' );
                           
     }
     
     public static function writeError( $msg, $target = 'all', $colored = true ) {
         
-        self::doWrite( $msg, $target, "[ERROR]", $colored, 'red');
+        self::doWrite( $msg, $target, "[ERROR]", $colored, 'red' );
                           
     }
     
     public static function writeTrace( $msg, $target = 'file', $colored = false ) {
         
-        self::doWrite( $msg, $target, "[ERROR]", $colored, 'red');
+        self::doWrite( $msg, $target, "[ERROR]", $colored, 'red' );
                           
     }
     
@@ -72,8 +81,8 @@ class Log {
         
         if( $colored && self::$is_colored_glob ) {
             
-            $msg_colored_prefix = self::addColor($msg_prefix, $color );
-            
+            $msg_colored_prefix = self::addColor( $msg_prefix, $color );
+                
         }else{
             
             $msg_colored_prefix = $msg_prefix;
@@ -82,7 +91,7 @@ class Log {
         
         $space = '';
         
-        if( strlen($msg_prefix) > 1 ) {
+        if( strlen( $msg_prefix ) > 1 ) {
             
             $space = ' ';
             
@@ -91,18 +100,27 @@ class Log {
         $msg_colored = $msg_colored_prefix . $space . $msg;
         $msg = $msg_prefix . $space . $msg;
         
+                
+        if( self::$redirect_to_stdout === true ) {
+            
+            $target = 'console';
+            
+            $msg_colored = "[ " . date("M d H:i:s") . " ][PHP]" . $msg;
+           
+        }
+        
         if( $target == 'all') {
             
-            self::writeToConsole($msg_colored);
-            self::writeToFile($msg);
+            self::writeToConsole( $msg_colored );
+            self::writeToFile( $msg );
             
-        }elseif( $target == 'console') {
+        }elseif( $target == 'console' ) {
             
-            self::writeToConsole($msg_colored);
+            self::writeToConsole( $msg_colored );
             
-        }elseif($target == 'file') {
+        }elseif( $target == 'file' ) {
             
-            self::writeToFile($msg);
+            self::writeToFile( $msg );
             
         }
     }
@@ -111,9 +129,9 @@ class Log {
         
         $colored_string = $string;
         
-        if( isset(self::$colors[$color]) ) {
+        if( isset( self::$colors[ $color ] ) ) {
             
-            $color_code = self::$colors[$color];
+            $color_code = self::$colors[ $color ];
             $colored_string = "\033[" . $color_code . "m" . $string . "\033[0m";
         }
         
@@ -125,18 +143,17 @@ class Log {
         
         if( ! self::$is_write ) { return; } 
         
-        $new_line = substr( $msg, -6);
+        $new_line = substr( $msg, -6 );
         
         if( $new_line != '!<new>') {
             
             echo $msg . "\n";
             
-        }else {
+        } else {
             
-            echo substr( $msg, 0, -6);
+            echo substr( $msg, 0, -6 );
             
         }
-        
         
     }
 
@@ -146,13 +163,13 @@ class Log {
         
         $log_file_path = self::$log_path . DS . self::$app_log_file;
         
-        if( !file_exists($log_file_path) ) {
+        if ( ! file_exists( $log_file_path ) ) {
             
-            file_put_contents($log_file_path, '');
+            file_put_contents( $log_file_path, '' );
             
         }
         
-        file_put_contents( $log_file_path, date("Y-m-d H:i:s" ,time()) ." " . $msg . "\n", FILE_APPEND );
+        file_put_contents( $log_file_path, date( "Y-m-d H:i:s" ,time() ) ." " . $msg . "\n", FILE_APPEND );
         
     }
     
