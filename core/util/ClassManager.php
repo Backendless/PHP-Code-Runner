@@ -31,7 +31,8 @@ class ClassManager
         $all_files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $path_to_folder ) );
         $php_files = new RegexIterator($all_files, '/\.php$/');
         
-        $classes_namespaces = [];
+        $classes = [];
+        $namespaces_path = [];
         
         foreach ( $php_files as $php_file) {
             
@@ -55,27 +56,30 @@ class ClassManager
             
             self::putToHolder( $class_info, 'class_name' );
             
-            $classes_namespaces[ $class_info['namespace'] ] = pathinfo($class_info["path"])["dirname"]; //key = namespace key = path to folder;
+            $namespaces_path[ $class_info[ 'namespace' ] ] = pathinfo( $class_info[ 'path' ] )[ 'dirname' ]; //key = namespace key = path to folder;
             
-            if( $map_calsses == true ) {
-                
-                Backendless::mapTableToClass( $class_info['class_name'], $class_info['namespace'] . "\\" . $class_info['class_name'] ); // set mapping for SDK.
-                
-            }
+            $classes[ ] = [ 'name' => $class_info[ 'class_name' ], 'namespace' => $class_info[ 'namespace' ] . "\\" . $class_info[ 'class_name' ] ];
              
         }
         
-        foreach ( $classes_namespaces as $namespace=>$path ) {
+        foreach ( $namespaces_path as $namespace=>$path ) {
         
             Autoload::addNamespace( $namespace, $path ); // add autoloading for user classes
-            
+                        
         }
         
-        //Log::writeInfo( "ClassManager finished analyze classes", "file" );
+        if( $map_calsses == true ) {
+        
+            foreach ( $classes as $class ) {
+                
+                Backendless::mapTableToClass( $class[ 'name' ], $class[ 'namespace' ] ); // set mapping for SDK.
+                
+            }
+                
+        }
         
     }
-    
-    
+        
     private static function getNamespace( $code ) {
         
         if ( preg_match('/^(.*)?namespace(.*?);$/m', $code, $matches ) ) {
