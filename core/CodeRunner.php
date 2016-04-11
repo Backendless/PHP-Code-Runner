@@ -517,7 +517,7 @@ class CodeRunner
                 } //else {    exec("taskkill /F /PID $pid"); }
                 
                 $predis = RedisManager::getInstance()->getRedis();
-                $predis->expire( Config::$DEBUG_ID, 0 );
+                //$predis->expire( Config::$DEBUG_ID, 0 );
                 
            }
            
