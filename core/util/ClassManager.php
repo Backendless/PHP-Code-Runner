@@ -17,7 +17,9 @@ class ClassManager
     
     protected static $included = [];
     protected static $classes_holder = [];
-    
+    protected static $is_analyzed = false;
+
+
     public static function analyze( $path_to_folder, $map_calsses = true ) { 
         
         //Log::writeInfo( "ClassManager start analyze classes", "file" );
@@ -77,6 +79,8 @@ class ClassManager
             }
                 
         }
+        
+        self::$is_analyzed = true;
         
     }
         
@@ -240,6 +244,12 @@ class ClassManager
             
         }
         
+    }
+    
+    public static function isAnalyzed() {
+        
+        return self::$is_analyzed;
+                
     }
     
     public static function debug(){  var_dump( self::$classes_holder ); }

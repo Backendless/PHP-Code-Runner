@@ -69,7 +69,11 @@ class MessageDispatcher
             Config::$RELATIVE_PATH  =   $msg['relativePath'];
             Config::$TASK_APPLICATION_ID = $msg['applicationId'];
             
-            ClassManager::analyze( PathBuilder::getClasses() );
+            if( ! ClassManager::isAnalyzed() ) {
+            
+                ClassManager::analyze( PathBuilder::getClasses() );
+                
+            }
             
         }
         

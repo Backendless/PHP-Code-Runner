@@ -99,8 +99,12 @@ class CodeRunner
             
         } else {
             
-            $this->message_processor->run();
-            $this->responder_processor->cloudRun();
+            for( ; ; ) {
+                
+                $this->message_processor->run();
+                $this->responder_processor->cloudRun();
+            
+            }
             
         }
         
