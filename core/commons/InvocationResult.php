@@ -6,7 +6,7 @@ use backendless\core\Config;
 class InvocationResult
 {
     private $arguments;
-    private $exeption;
+    private $exception;
 
 
     public function setInvocationResult( $arguments, $exeption = null ) {
@@ -15,7 +15,7 @@ class InvocationResult
         
         if( $exeption !== null ) {
             
-            $this->exeption = $exeption;
+            $this->exception = $exeption;
             
         }
               
@@ -35,7 +35,7 @@ class InvocationResult
   
     public function getException() {
         
-      return $this->$exception;
+      return $this->exception;
       
     }
 
@@ -61,9 +61,19 @@ class InvocationResult
     
     public function getConvertedToArray() {
         
-        $data = ["___jsonclass" => Config::$CORE["invocation_result"] ];
-        $data['arguments'] = $this->encode( json_encode( $this->arguments ) );
-        $data['exception'] = $this->exeption;
+        $data = [ '___jsonclass' => Config::$CORE[ 'invocation_result' ] ];
+        
+        if( is_object( $this->exception ) ) {
+        
+            $data[ 'exception' ] = $this->exception->getAsArray();
+            $data[ 'arguments' ] = null;
+            
+        } else {
+            
+            $data[ 'arguments' ] = $this->encode( json_encode( $this->arguments ) );
+            $data[ 'exception' ] = null;
+            
+        }
         
         return $data;
 
