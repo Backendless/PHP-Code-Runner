@@ -11,7 +11,7 @@ class  CodeRunnerLoader
 {
     
     private static $VALID_PATTERN =  "[A-F0-9\-]{36}";
-    private static $keys_list = ['--driverHostPort', '--requestId', '--coderunnerId' ];
+    private static $keys_list = ['--driverHostPort', '--coderunnerId' ];
 
     public static function load( $argc, $argv ) {
         
@@ -58,17 +58,15 @@ class  CodeRunnerLoader
         
     }
 
-    
     private static function checkInputKeysForCloud( $argc, $argv ) {
         
-        //./CodeRunner.sh --driverHostPort=<host:porrt> --requestId=<id> --coderunnerId=<id>
-
-        unset( $argv[0] );
+        //./CodeRunner.sh --driverHostPort=<host:porrt> --coderunnerId=<id>
+        unset( $argv[ 0 ] );
         
-        if( $argc <= 3 ) {
+        if( count( $argv ) > 2 ) {
             
-            Log::writeError("Not all the arguments passed to the script, make sure that the set --driverHostPort=<host:porrt> --requestId=<id> --coderunnerId=<id>");
-            exit(0);
+            Log::writeError( 'Script need two arguments, make sure that the set only --driverHostPort=<host:porrt> --coderunnerId=<id>' );
+            exit( 0 );
         }
         
         $arg_info = [];
@@ -77,29 +75,29 @@ class  CodeRunnerLoader
             
             $key_info = explode( "=", $argument );
             
-            if( isset( $key_info[0]) ) {
+            if( isset( $key_info[ 0 ] ) ) {
                 
-                $arg_info[$key_info[0]] = '';
+                $arg_info[ $key_info[ 0 ] ] = '';
             }
             
-            if( isset( $key_info[1] ) ) {
+            if( isset( $key_info[ 1 ] ) ) {
                 
-                $arg_info[$key_info[0]] = $key_info[1];
+                $arg_info[ $key_info[ 0 ] ] = $key_info[ 1 ];
             }
             
         }
 
         foreach ( self::$keys_list as $key ) {
         
-            if( isset($arg_info[ $key ]) ) {
+            if( isset( $arg_info[ $key ] ) ) {
 
                 if( $arg_info[ $key ] !== '' && $arg_info[ $key ] !== null ) {
 
-                    Config::$CORE['processing_' . str_replace("-", "_", trim($key, "-") ) ] = $arg_info[$key];
+                    Config::$CORE[ 'processing_' . str_replace( "-", "_", trim( $key, "-" ) ) ] = $arg_info[ $key ];
                     
                 }else{
 
-                    Log::writeError(" Missing value of argument $key ");
+                    Log::writeError( " Missing value of argument $key " );
                     exit(0);  
                 }
 

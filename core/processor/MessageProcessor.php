@@ -6,7 +6,6 @@ use backendless\core\RedisManager;
 use backendless\core\processor\MessageDispatcher;
 use backendless\core\lib\HttpRequest;
 use backendless\core\lib\Log;
-use backendless\core\commons\exception\CodeRunnerException;
 
 
 class MessageProcessor
@@ -28,63 +27,60 @@ class MessageProcessor
     }
 
     public function run() {
-        
-        
-            $address = "127.0.0.1";
-            $port = 4545;
    
-            $socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP );
+        $socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP );
    
-            $message = '';
+        $responce = '';
+        
+        $url_parts = parse_url( Config::$CORE[ 'processing_driverHostPort' ] );
   
-            if( !socket_connect($socket, $address, $port) ) exit( socket_strerror( socket_last_error() ) );
-                else echo 'Socket_connected!'."\r\n";
+        if( ! socket_connect( $socket, $url_parts[ 'host' ], $url_parts[ 'port' ] ) ) {
+            
+            Log::writeError( "Socket connection with host:{$url_parts[ 'host' ]} and port:{$url_parts[ 'port' ]} failed." );
+            exit( 0 );
+        
+        } else {
+            
+            Log::writeInfo( "Connection to socket successful" );
+            $this->sendPortInfo( [ "port:" => $url_parts[ 'port' ] ] );
+                
+        }
   
-                while ( socket_recv( $socket, $buff, 2048, 0 ) ) {
+        while ( socket_recv( $socket, $buff, 2048, 0 ) ) {
 
-                    $message .= $buff;
+            $responce .= $buff;
 
-                }
+        }
                 
+        if( $responce == Config::$CORE[ 'shutdown_code' ] ) {
+            
+            Log::writeInfo( 'CodeRunner stopped from driver', $target = 'file' );
+            
+            exit( 0 );
+                        
+        }
                 
-                if( $message == Config::$CORE[ 'shutdown_code' ] ) {
-                    
-                    die(" shutdown from driver" );
-                }
+        $this->dispatcher->onMessageReceived( $responce );
+       
+    }
+    
+    protected function sendPortInfo( $message ) {
+        
+        $http_request = new HttpRequest();
+        
+        $target = Config::$CORE[ 'processing_driverHostPort' ] . '/driverHostPort/sendPort';
+        
+        $http_request->setTargetUrl( $target )
+                     ->setHeader( 'Content-type', 'application/json' )
+                     ->request( json_encode( $message ), 'POST' );
+        
+        if( $http_request->getResponseCode() != 200 ) {
+            
+            Log::writeError( 'Sending port number to driver failed.' );
+            exit( 0 );
+        
+        }
                 
-                $this->dispatcher->onMessageReceived( $message );
-  
- 
-        
-//        $http_request = new HttpRequest();
-//        
-//        $target = Config::$CORE['processing_driverHostPort'] .'/getRequest?'
-//                                                                         . 'coderunnerId=' . Config::$CORE['processing_coderunnerId'] .''
-//                                                                         . '&requestId=' . Config::$CORE['processing_requestId']
-//                                                                         . '&lang=PHP';
-//        
-//        $http_request->setTargetUrl( $target )
-//                     ->setHeader('Content-type', 'application/json')
-//                     ->request( '', 'GET' );
-//
-//        if( $http_request->getResponseCode() == 200 ) {
-//
-//            Log::writeInfo( "Data received from java driver" . $http_request->getResponce(), $target = 'file' );
-//                        
-//            $this->dispatcher->onMessageReceived( $http_request->getResponce() );  
-//
-//        } else {
-//        
-//            $msg = "CodeRunner get task fail, HTTP response code: " . $http_request->getResponseCode() . " response status: " . $http_request->getResponseStatus();
-//
-//            Log::writeError( $msg, $target = 'file' );
-//
-//            throw new CodeRunnerException( $msg );
-//            
-//        }
-        
-        
-        
     }
     
 }

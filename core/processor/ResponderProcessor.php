@@ -67,19 +67,19 @@ class ResponderProcessor
 
         $http_request = new HttpRequest();
         
-        $target = Config::$CORE['processing_driverHostPort'] . '/sendResult?'
-                                                       . 'coderunnerId=' . Config::$CORE['processing_coderunnerId'] . ''
-                                                       . '&requestId=' . Config::$CORE['processing_requestId'] . ''
-                                                       . '&lang=PHP';
+        $target = Config::$CORE[ 'processing_driverHostPort' ] . '/sendResult?'
+                                                               . 'coderunnerId=' . Config::$CORE['processing_coderunnerId']  
+                                                            // . '&requestId=' . Config::$CORE['processing_requestId'] . ''
+                                                               . '&lang=PHP';
         $result_data = '';
         
-        if( is_object( $result['result'] ) ) {
+        if( is_object( $result[ 'result' ] ) ) {
             
             $result_data = json_encode( $result['result']->getConvertedToArray() );
             
         } else {
             
-            $result_data = json_encode($result['result']);
+            $result_data = json_encode( $result['result'] );
             
         }
         

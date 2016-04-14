@@ -3,7 +3,6 @@ namespace backendless\core\processor;
 
 use backendless\core\processor\MessageProcessor;
 use Predis\Connection\ConnectionException;
-use backendless\core\RedisManager;
 use backendless\core\Config;
 use backendless\core\lib\Log;
 
@@ -48,12 +47,10 @@ class DebugMessageProcessor extends MessageProcessor
         } 
     }
         
-    
     public function getChannel() {
         
         return Config::$APPLICATION_ID;
         
     }
-    
-    
+        
 }
