@@ -18,6 +18,8 @@ class RunnerContext extends AbstractContext
         $this->missingProperties   =   $arguments[ 'missingProperties' ];
         $this->prematureResult     =   $arguments[ 'prematureResult' ];
         
+        $this->setEeventContext( $arguments );
+        
     }
 
     public function getMissingProperties() { // return map (array)
@@ -51,6 +53,26 @@ class RunnerContext extends AbstractContext
         $properties =  ["___jsonclass" => Config::$CORE["runner_context"] ];
     
         return array_merge( $properties, get_object_vars( $this ) );
+        
+    }
+    
+    public function getEventContext() {
+        
+        return $this->event_context;
+        
+    }
+    
+    protected function setEeventContext( &$arguments ) {
+        
+        if( isset( $arguments[ 'eventContext' ] ) ) {
+            
+            $this->event_context = $arguments[ 'eventContext' ];
+            
+        } else {
+            
+            $this->event_context = null;
+            
+        }
         
     }
     

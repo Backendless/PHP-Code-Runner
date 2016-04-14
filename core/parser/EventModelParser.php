@@ -36,7 +36,7 @@ class EventModelParser
   
     public function parseProductionModel( $app_version_id ) {
         
-        Log::writeInfo("Parsing EventModel for appVersion: $app_version_id", $target = 'file');
+        Log::writeInfo("Load production EventModel for appVersion: $app_version_id", $target = 'file');
 
         $event_handlers_model = new EventHandlersModel();
 

@@ -89,7 +89,7 @@ class ResponderProcessor
         
         Log::writeInfo( "Data sent to java driver" . $result_data, $target = 'file' );
 
-        if( $http_request->getResponseCode() !== 200 ) {
+        if( $http_request->getResponseCode() != 200 ) {
             
             $msg = "CodeRunner set task result fail, HTTP response code: " . $http_request->getResponseCode() . " response status: " . $http_request->getResponseStatus();
 
@@ -97,7 +97,7 @@ class ResponderProcessor
 
         } else {
             
-            Log::writeInfo( "Invocation result put to driver", "file");
+            Log::writeInfo( "Invocation result put to driver successful", "file");
             
         }
         

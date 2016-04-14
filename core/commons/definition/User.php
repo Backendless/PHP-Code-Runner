@@ -34,5 +34,13 @@ return [
         'beforeRemoveBulk' =>  [ 'id' => 220, 'index' => null, 'type' => 'BEFORE' ],
         'afterRemoveBulk'  =>  [ 'id' => 221, 'index' => null, 'type' => 'AFTER' ],                                    
     
+        'beforeEmailConfirmed' => [ 'id' => 222, 'index' => null, 'type' => 'BEFORE' ],
+        'afterEmailConfirmed'  => [ 'id' => 223, 'index' => null, 'type' => 'AFTER' ],
+    
+        'beforeSocialLogin' => [ 'id' => 224, 'index' => null, 'type' => 'BEFORE' ],
+        'afterSocialLogin'  => [ 'id' => 225, 'index' => null, 'type' => 'AFTER' ],
+    
+        'beforeSocialRegister' => [ 'id' => 226, 'index' => null, 'type' => 'BEFORE' ],
+        'afterSocialRegister'  => [ 'id' => 227, 'index' => null, 'type' => 'AFTER' ],
+    
        ];
-  

@@ -28,7 +28,7 @@ Config::loadConfig();
 
 CodeRunnerLoader::phpEnviromentInit( );
 
-Log::init( Config::$CORE['os_type'], "LOCAL", false );
+Log::init( "LOCAL", false, Config::$CORE['os_type'] );
 
 $predis = RedisManager::getInstance()->getRedis();
 

@@ -82,7 +82,6 @@ class CodeExecutor
       
     private function initEventModel() {
         
-      Log::write( "Init event model for appVersionId : " . $this->app_version_id, $target = "file" );
       $this->event_handlers_model = EventModelParser::getInstance()->parseProductionModel( $this->app_version_id );
       
     }
