@@ -24,6 +24,7 @@
                 "invocation_result"         =>      "com.backendless.coderunner.commons.protocol.InvocationResult",
                 "runner_context"            =>      "com.backendless.servercode.RunnerContext",
                 "execution_result"          =>      "com.backendless.servercode.ExecutionResult",
+                "exception_wrapper"         =>      "com.backendless.commons.exception.ExceptionWrapper",
     
                 'definition_source_path'    =>  [ 'core', 'commons', 'definition' ], //     core/commons/definition
 
@@ -60,6 +61,6 @@
                     
                                     ],
 
-                'logging_in_cloud_mode'   => false
+                'logging_in_cloud_mode'   => true
     
             ];
