@@ -350,67 +350,53 @@ class CodeRunner
     
     protected function createArchive( $code_zip_path, $hosted ) {
         
-        $classes_path = realpath( getcwd() . DS . Config::$CLASS_LOCATION );
-
         $zip = new ZipArchive;
-
+        
         $zip->open( $code_zip_path, ZipArchive::CREATE );
-
-        $files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $classes_path ), RecursiveIteratorIterator::LEAVES_ONLY );
-
-        $class_location_folder_name = basename ( Config::$CLASS_LOCATION );
-
-        foreach ( $files as $file ) {
-
-            if( $file->getFileName() === '.' || $file->getFileName() == '..') {
-                continue;
-            }
-
-            $path_part = explode( $class_location_folder_name, $file);
-            $zip->addFile( $file, $class_location_folder_name . $path_part[1] );
-
-        }
-
-        $lib_path = realpath( getcwd() . DS . ".." . DS . 'lib' );
-
-        $files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $lib_path ), RecursiveIteratorIterator::LEAVES_ONLY );
-
-        foreach ( $files as $file ) {
-
-            if( $file->getFileName() === '.' || $file->getFileName() == '..' ) {
-                continue;
-            }
-
-            $path_part = explode( 'lib', $file );
-            $zip->addFile( $file, 'lib' . $path_part[1] );
-
-        }
         
-        $model_file_path = realpath( getcwd() . DS . Config::$CORE['tmp_dir_path'] );
-        
-        $new_file_name = '';
+        $this->addFolderToArchive( $zip, realpath( getcwd() . DS . Config::$CLASS_LOCATION ) );
+        $this->addFolderToArchive( $zip, realpath( getcwd() . DS . '..' . DS . 'lib' ) );
         
         if( $hosted ) {
             
-            $model_file_path .=  DS . 'hosted' . DS . 'model.json';
-            $new_file_name = 'model.json';
-
-            file_put_contents( $model_file_path, $this->hosted_model->getJson() );
+            $zip->addFromString( 'model.json', $this->hosted_model->getJson() );
             
         } else {    
             
-            $model_file_path .=  DS . 'events' . DS . 'model.json';
-            $new_file_name = 'model.json';
-
-            file_put_contents( $model_file_path, $this->event_handlers_model->getJson( true ) );
+            $zip->addFromString( 'model.json', $this->event_handlers_model->getJson( true ) );
             
         }
         
-        $zip->addFile( $model_file_path, $new_file_name );
-        
         $zip->close();
+            
+    }
+    
+    protected function addFolderToArchive( $archive, $path ) {
+
+         $files = new RecursiveIteratorIterator( 
+                                                    new RecursiveDirectoryIterator(
+                                                                                    $path,
+                                                                                    RecursiveDirectoryIterator::SKIP_DOTS 
+                                                                                   ) 
+                                               );
         
-        unlink( $model_file_path );
+        $class_location_folder_name = basename ( $path );
+        
+        foreach ( $files as $file ) {
+                        
+            $folder_path_inside_archive = strstr( pathinfo( $file->getPathName() )[ 'dirname' ], basename ( $path ) );
+            
+            if ( Config::$CORE[ 'os_type' ] == 'WIN' ) {
+                
+                $folder_path_inside_archive = str_replace( DS, '/', $folder_path_inside_archive );
+                
+            }
+            
+            $archive->addEmptyDir( $folder_path_inside_archive );
+            
+            $archive->addFile( $file->getPathName(), $folder_path_inside_archive . '/' . $file->getFileName() );
+            
+        }
         
     }
   

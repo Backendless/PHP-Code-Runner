@@ -107,7 +107,7 @@ class EventModelParser
         
         Log::writeInfo( "Processing analyzing class: " . $class['class_name'] , $target = 'file' );
 
-        ReflectionUtil::includeFile( $class['path'] );
+        //ReflectionUtil::includeFile( $class['path'] );
         //ClassManager::addAsIncluded( $class['path'] );
         
         $reflection = new ReflectionClass( "\\" . $class['namespace'] . "\\".  $class['class_name']);
