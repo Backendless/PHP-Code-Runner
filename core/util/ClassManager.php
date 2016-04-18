@@ -71,6 +71,8 @@ class ClassManager
         }
         
         if( $map_calsses == true ) {
+            
+            Backendless::ignoreMapException();
         
             foreach ( $classes as $class ) {
                 

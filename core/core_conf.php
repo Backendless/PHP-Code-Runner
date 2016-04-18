@@ -61,6 +61,6 @@
                     
                                     ],
 
-                'logging_in_cloud_mode'   => true
+                'logging_in_cloud_mode'   => false
     
             ];
