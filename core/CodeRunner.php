@@ -378,6 +378,8 @@ class CodeRunner
     
     protected function addFolderToArchive( $archive, $path ) {
 
+        $skip_sdk = 'lib/backendless';
+        
          $files = new RecursiveIteratorIterator( 
                                                     new RecursiveDirectoryIterator(
                                                                                     $path,
@@ -393,7 +395,13 @@ class CodeRunner
             
             if ( Config::$CORE[ 'os_type' ] == 'WIN' ) {
                 
-                $folder_path_inside_archive = str_replace( DS, '/', $folder_path_inside_archive );
+                $folder_path_inside_archive = str_replace( DS , '/', $folder_path_inside_archive );
+                
+            }
+            
+            if( strstr( $folder_path_inside_archive, $skip_sdk, $before_needle = true) === "" ) {
+                
+                continue;
                 
             }
             
