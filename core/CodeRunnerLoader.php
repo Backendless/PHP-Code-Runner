@@ -113,17 +113,17 @@ class  CodeRunnerLoader
     
     private static function checkForInputKeys( $argc, $argv ) {
 
-        if( $argc <=1 ) { return false; }
+        if( $argc <= 1 ) { return false; }
 
-        if( $argc != 4 && $argc !=2 && $argc !=5 ) {
+        if( $argc != 3 && $argc != 2 && $argc != 5 ) {
             
-            return Log::writeError("Invalid script arguments count", $target = 'console');
+            return Log::writeError( 'Invalid script arguments count', $target = 'console' );
             
         }
         
         if( $argc == 2 ) {
             
-             if( $argv[1] == "deploy" ) {
+             if( $argv[ 1 ] == 'deploy' ) {
             
                  Config::$AUTO_PUBLISH = true;
                  return;
@@ -134,40 +134,39 @@ class  CodeRunnerLoader
         
         $argv_position = 0;
         
-        if( $argc == 5) {
+        if( $argc == 5 ) {
 
-            if( $argv[1] == "deploy" ) {
+            if( $argv[ 1 ] == 'deploy' ) {
             
                 Config::$AUTO_PUBLISH = true;
                 $argv_position = 1;
           
             } else {
                 
-                return Log::writeError("Invalid script arguments count", $target = 'console');
+                return Log::writeError( 'Invalid script arguments count', $target = 'console' );
                 
             }
             
         }
 
-        if( $argc == 4 || $argc == 5 ) {
+        if( $argc == 3 || $argc == 5 ) {
             
-            Config::$APPLICATION_ID = $argv[ $argv_position+1 ];
-            Config::$SECRET_KEY     = $argv[ $argv_position+2 ];
-            Config::$APP_VERSION    = $argv[ $argv_position+3 ];
+            Config::$APPLICATION_ID = isset( $argv[ $argv_position+1 ] ) ? $argv[ $argv_position+1 ] : '';
+            Config::$SECRET_KEY     = isset( $argv[ $argv_position+2 ] ) ? $argv[ $argv_position+2 ] : '';
+            Config::$APP_VERSION    = isset( $argv[ $argv_position+3 ] ) ? $argv[ $argv_position+3 ] : '';
             Config::$need_save_keys = true;
 
             // chek if not format for cloud run
             $keys = [];
-            $keys[] = explode( '=', $argv[1])[0];
-            $keys[] = explode( '=', $argv[2])[0];
-            $keys[] = explode( '=', $argv[3])[0];
+            $keys[] = explode( '=', $argv[ 1 ] )[ 0 ];
+            $keys[] = explode( '=', $argv[ 2 ] )[ 0 ];
 
             foreach ( self::$keys_list as $key ) {
 
-                if( in_array($key, $keys) ) {
+                if( in_array( $key, $keys ) ) {
 
-                    Log::writeError("Run in LOCAL mode don't need set keys " . implode( ',', self::$keys_list ), $target = 'all');
-                    exit();
+                    Log::writeError( "Run in LOCAL mode don't need set keys " . implode( ',', self::$keys_list ), $target = 'all' );
+                    exit( 0 );
 
                 }
             }
