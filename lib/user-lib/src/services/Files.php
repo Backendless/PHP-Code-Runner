@@ -6,22 +6,24 @@ use backendless\Backendless;
 use backendless\lib\HttpRequest;
 use backendless\lib\RequestBuilder;
 use backendless\model\BackendlessCollection;
-use backendless\exception\BackendlessException;
+use Exception;
 
 class Files
 {
     
     protected static $instance;
     
-    private static $APP_ID_KEY = 'application-id';
-    private static $SECRET_KEY = 'secret-key';
-    private static $VERSION = 'AppVersion';
+    private static $APP_ID_KEY = "application-id";
+    private static $SECRET_KEY = "secret-key";
+    private static $VERSION = "AppVersion";
     
-    private function __construct() { }
+    private function __construct() {
+    
+    }
 
     public static function getInstance() {
         
-        if( !isset( self::$instance ) ) {
+        if( !isset(self::$instance)) {
             
             self::$instance = new Files();
             
@@ -33,7 +35,7 @@ class Files
     
     public function upload( $file, $remote_path = null ) {
         
-        if( !is_object( $file ) ) {
+        if( !is_object($file) ) {
             
             $path = $file;
             $file = new File();
@@ -43,22 +45,22 @@ class Files
         
         $file->validate();
         
-        $target = Backendless::getUrl() . '/' . Backendless::getApplicationId(). '/' . Backendless::getVersion() . '/files'; 
+        $target = Backendless::getUrl() . "/" . Backendless::getApplicationId(). "/" . Backendless::getVersion() . "/files"; 
             
         if( $remote_path !== null ) {
             
-            $remote_path = trim( $remote_path," \t\n\r\0\x0B\\" );
-            $remote_path = str_replace( "\\", "/", $remote_path );
+            $remote_path = trim($remote_path," \t\n\r\0\x0B\\");
+            $remote_path = str_replace("\\", "/", $remote_path);
             
-            $target .= '/' . $remote_path;
+            $target .= "/" . $remote_path;
 
         }
         
-        $target .= '/' . $file->getFileName();
+        $target .= "/" . $file->getFileName();
                 
         $http_request = new HttpRequest();
 
-        $multipart_boundary = "------BackendlessFormBoundary" . md5( uniqid() ) . microtime( true );
+        $multipart_boundary ="------BackendlessFormBoundary" . md5(uniqid()) . microtime(true);
 
         $file_contents = file_get_contents($file->getPath());
 
@@ -71,11 +73,11 @@ class Files
         
         RequestBuilder::addUserTokenHeader( $http_request );
        
-        $http_request->setTargetUrl( $target )
-                     ->setHeader( self::$APP_ID_KEY, Backendless::getApplicationId() )
-                     ->setHeader( self::$SECRET_KEY, Backendless::getSecretKey() )
-                     ->setHeader( self::$VERSION, Backendless::getVersion() )
-                     ->setHeader( 'Content-type', ' multipart/form-data; boundary=' .$multipart_boundary )
+        $http_request->setTargetUrl($target)
+                     ->setHeader(self::$APP_ID_KEY, Backendless::getApplicationId())
+                     ->setHeader(self::$SECRET_KEY, Backendless::getSecretKey())
+                     ->setHeader(self::$VERSION, Backendless::getVersion())
+                     ->setHeader('Content-type', ' multipart/form-data; boundary=' .$multipart_boundary )
                      ->request( $content  );
         
         
@@ -83,13 +85,13 @@ class Files
             
             $error =  json_decode( $http_request->getResponse(), true );
             
-            if( !isset( $error[ 'message' ] ) ) {
+            if( !isset($error['message']) ) {
                 
-                throw new Exception( 'API responce ' .$http_request->getResponseStatus() . ' ' . $http_request->getResponseCode() . $http_request->getResponse() );
+                throw new Exception( "API responce " .$http_request->getResponseStatus() . ' ' . $http_request->getResponseCode() . $http_request->getResponse() );
                 
-            } else {
+            }else{
                 
-                throw new Exception( $error[ 'message' ], $error[ 'code' ] );
+                throw new Exception( $error['message'], $error['code'] );
                 
             }
 
@@ -151,7 +153,7 @@ class Files
             
             if( !isset( $error[ 'message' ] ) ) {
                 
-                throw new Exception( 'API responce ' . $http_request->getResponseStatus() . ' ' . $http_request->getResponseCode() . $http_request->getResponse() );
+                throw new Exception( "API responce " . $http_request->getResponseStatus() . ' ' . $http_request->getResponseCode() . $http_request->getResponse() );
                 
             }else{
                 
@@ -205,8 +207,8 @@ class Files
         
         $request_body = [
             
-            'oldPathName' => $old_path_mame,
-            'newName' => $new_name
+            "oldPathName" => $old_path_mame,
+            "newName" => $new_name
             
         ];
         
@@ -226,8 +228,8 @@ class Files
         
         $request_body = [
             
-            'sourcePath' => $source_path_name,
-            'targetPath' => $target_path
+            "sourcePath" => $source_path_name,
+            "targetPath" => $target_path
             
         ];
         
@@ -244,8 +246,8 @@ class Files
         
         $request_body = [
             
-            'sourcePath' => $source_path_name,
-            'targetPath' => $target_path
+            "sourcePath" => $source_path_name,
+            "targetPath" => $target_path
             
         ];
         
@@ -268,20 +270,20 @@ class Files
         
         if(  $pattern != null ) {
             
-            $query_data[ 'pattern' ] = $pattern;
+            $query_data["pattern"] = $pattern;
             
         }
         
         if(  $recursive != false ) {
             
-            $query_data[ 'sub' ] = 'true';
+            $query_data["sub"] = "true";
             
         }
         
         if(  $page_size != null && $offset != null ) {
 
-            $query_data[ 'pagesize' ] = $page_size;
-            $query_data[ 'offset' ] = $offset;
+            $query_data['pagesize'] = $page_size;
+            $query_data['offset'] = $offset;
             
             
         }
@@ -290,7 +292,7 @@ class Files
         
         if( !empty( $query ) ) {
             
-            $url .= '?' . $query;
+            $url .="?" . $query;
             
         }
 
@@ -305,7 +307,7 @@ class Files
         
         if( empty( $file_path ) ) {
             
-            throw new BackendlessException( 'File path variable empty' );
+            throw new Exception("File path variable empty");
             
         }
         

@@ -2,26 +2,33 @@
 namespace backendless\model;
 
 use backendless\exception\BackendlessException;
+use ReflectionClass;
 
-class Data {
+class BackendlessUser{
    
-    public function __construct() { }
-    
-    public function __set( $key, $value ) {
+    public function  __construct() {
         
-        $this->{ $key } = $value;
-       
+    }
+
+    public function getUserId() {
+    
+        return $this->getObjectId();
+            
     }
     
-    public function __get( $key ) {
+    public function getUserToken() {
         
-        if( isset( $this->{ $key } ) ) {
+        return ( isset( $this->{'user-token'} ) ) ? $this->{'user-token'} : null;
+        
+    }
+    
+    public function unsetUserToken() {
+        
+        if ( isset( $this->{'user-token'} ) ) {
             
-        return $this->{ $key };
+            unset( $this->{'user-token'} );
             
         }
-        
-        return null;
         
     }
     
@@ -56,7 +63,7 @@ class Data {
         
         $object_vars = get_object_vars( $this );
         
-        foreach ( $object_vars as $name => $val ) {
+        foreach ( $object_vars as $name=>$val ) {
 
             unset( $this->{ $name });
             
@@ -64,7 +71,7 @@ class Data {
                 
         if( is_array( $properties) ) {
             
-            foreach ( $properties as $key => $value ) {
+            foreach ( $properties as $key=>$value ) {
                 
                 $this->{ $key } = $value;
                         
@@ -80,7 +87,7 @@ class Data {
     
     public function setProperty( $key, $value) {
         
-        $this->{ $key } = $value;
+        $this->{ $key }  = $value;
         
     }
     
@@ -116,39 +123,39 @@ class Data {
     }
     
     public function __call( $name, $arguments ) {
+        
+        $action_name = substr( $name, 0, 3 );
+        $property = substr( $name, 3 );
+        
+        $property = lcfirst( $property );
+        
+        switch ( $action_name ) {
+            
+            case 'set': $this->setProperty( $property, $arguments[0] ); break;
+            
+            case 'get': return $this->getProperty( $property );
+                
+            default :   $action_name = substr( $name, 0, 5 );
+                        $property = substr( $name, 5 );
+        
+                        $property = lcfirst( $property );
+        
+                        if( $action_name === 'unset' ) {
 
-         $action_name = substr( $name, 0, 3 );
-         $property = substr( $name, 3 );
+                            if( isset( $this->{ $property } ) ) {
 
-         $property = lcfirst( $property );
-         
-         switch ( $action_name ) {
+                            unset( $this->{ $property } );
 
-             case 'set': $this->setProperty( $property, $arguments[ 1 ] ); break;
+                            }
 
-             case 'get': return $this->getProperty( $property );
-
-             default :   $action_name = substr( $name, 0, 5 );
-                         $property = substr( $name, 5 );
-
-                         $property = lcfirst( $property );
-
-                         if( $action_name === 'unset' ) {
-
-                             if( isset( $this->{ $property } ) ) {
-
-                                unset( $this->{ $property } );
-
-                             }
-
-                         } else {
-
-                             throw  new BackendlessException( "Called undefined function $name." );
-
-                         }
-
-         }
-
-     }
-
+                        } else {
+                
+                            throw  new BackendlessException( "Called undefined function $name." );
+                            
+                        }
+                
+        }
+        
+    }
+        
 }
