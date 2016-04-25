@@ -52,7 +52,7 @@ class CodeRunner
             
             $this->tryStopDebugIdUpdater();
       
-            $cmd = 'php ..' . DS . 'core' . DS . 'DebugIdUpdater.php ' . Config::$DEBUG_ID; 
+            $cmd = 'php -d xdebug.remote_autostart=0 ..' . DS . 'core' . DS . 'DebugIdUpdater.php ' . Config::$DEBUG_ID; 
             
             // start background script for updating in redis expire of debugId
             if( Config::$CORE['os_type'] != "WIN") {
