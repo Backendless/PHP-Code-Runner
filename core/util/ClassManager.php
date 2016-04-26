@@ -214,17 +214,17 @@ class ClassManager
         
     }
     
-    public static function getClassInstanceByName( $class_name, $construc_data = null ) {
+    public static function getClassInstanceByName( $class_name, $construct_data = null ) {
         
         $full_class_name = self::getFullClassName( $class_name );
         
-        if( $construc_data == null ) {
+        if( $construct_data == null ) {
             
             return new $full_class_name();
             
         } else {
             
-            return new $full_class_name( $construc_data );
+            return new $full_class_name( $construct_data );
             
         }
         
