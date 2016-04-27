@@ -16,13 +16,14 @@ use backendless\core\lib\Log;
 use Exception;
 use ZipArchive;
 
+
 class CodeRunner
 {
     private $message_processor;
     private $responder_processor;
     
     private $event_handlers_model;
-    private $hosted_model;
+    private $hosted_collection = [];
 
     public function __construct() {
         
@@ -192,7 +193,7 @@ class CodeRunner
     public function deployModel() {
         
         $is_empty_event_handlers_model = false;
-        $is_empty_hosted_model = false;
+        $is_empty_hosted_collection = false;
         
         if( $this->event_handlers_model == null || $this->event_handlers_model->getCountTimers() == 0 && $this->event_handlers_model->getCountEventHandlers() == 0 ) {
 
@@ -200,54 +201,54 @@ class CodeRunner
             
         }
         
-        if( $this->hosted_model == null || $this->hosted_model->getCountOfEvents() == 0 ) {
+        if( $this->hosted_collection->getCountsOfModels() == 0 || $this->hosted_collection->getCountOfEvents() == 0 ) {
 
-            $is_empty_hosted_model = true;
+            $is_empty_hosted_collection = true;
             
         }
         
-        if( $is_empty_event_handlers_model && $is_empty_hosted_model ) {
+        if( $is_empty_event_handlers_model && $is_empty_hosted_collection ) {
 
-            Log::writeWarn( "There is no code to deploy to Backendless..." );
+            Log::writeWarn( 'There is no code to deploy to Backendless...' );
             exit();
             
         }
         
         if( !Config::$AUTO_PUBLISH ) {
             
-            Log::writeInfo( "Deploying models to server, and starting debug..." );
+            Log::writeInfo( 'Deploying models to server, and starting debug...' );
             
         }else{
             
-            Log::writeInfo( "Deploying models to server..." );
+            Log::writeInfo( 'Deploying models to server...' );
             
         }
         
         try {
             
             CodeRunnerUtil::getInstance()->deployModel( $this->event_handlers_model );
-            CodeRunnerUtil::getInstance()->deployModel( $this->hosted_model, true );
+            CodeRunnerUtil::getInstance()->deployModel( $this->hosted_collection, true ); 
     
             ExternalHostHolder::getInstance()->setUrls( Config::$APPLICATION_ID, CodeRunnerUtil::getInstance()->getExternalHost() );
             
-            Log::writeInfo( "Models successfully deployed..." );
+            Log::writeInfo( 'Models successfully deployed...' );
                         
             if( !Config::$AUTO_PUBLISH ) {
                 
-                Log::writeInfo( "Waiting for events..." );
+                Log::writeInfo( 'Waiting for events...' );
                 
             }
             
         } catch( CodeRunnerException $e ) {
 
-           Log::writeError( "Models deploying failed..." ); 
+           Log::writeError( 'Models deploying failed...' ); 
            Log::writeError( $e->getMessage(), $target = 'file' );
            self::Stop();
             
             
         } catch( Exception $e ) {
             
-          Log::writeError( "Models deploying failed..." );
+          Log::writeError( 'Models deploying failed...' );
           Log::writeError( $e->getMessage(), $target = 'file' );
           self::Stop();
           
@@ -261,7 +262,7 @@ class CodeRunner
 
         if( $hosted ) {
             
-            $hosted_events = $this->hosted_model->getCountOfEvents();
+            $hosted_events = $this->hosted_collection->getCountOfEvents();
             
             if( $hosted_events <= 0) { return; }
             
@@ -320,7 +321,7 @@ class CodeRunner
   
     protected function resetTmpFolder( $hosted ){
         
-        $dir_path = Config::$CORE['tmp_dir_path'];
+        $dir_path = Config::$CORE[ 'tmp_dir_path' ];
         
         if( $hosted ) {
         
@@ -344,7 +345,7 @@ class CodeRunner
     
     protected function removeTmpFolder() {
         
-        $this->rrmdir( Config::$CORE['tmp_dir_path'] );
+        $this->rrmdir( Config::$CORE[ 'tmp_dir_path' ] );
                     
     }
     
@@ -359,7 +360,7 @@ class CodeRunner
         
         if( $hosted ) {
             
-            $zip->addFromString( 'model.json', $this->hosted_model->getJson() );
+            $zip->addFromString( 'model.json', $this->hosted_collection->getJson() );
             
         } else {    
             
@@ -441,12 +442,15 @@ class CodeRunner
         
         Log::writeInfo( "Build successfully event model: " . $this->event_handlers_model );
         
-        $this->hosted_model = HostedServiceParser::getInstance()->parseDebugModel();
+        $this->hosted_collection = HostedServiceParser::getInstance()->parseDebugModel();
         
-        HostedModelHolder::setModel( $this->hosted_model );
-        HostedModelHolder::setXMLModel( $this->hosted_model->getXML() );
+        // TODO change first object to collection
+        $first = $this->hosted_collection->getFirst();
         
-        Log::writeInfo( "Build successfully hosted model: " . $this->hosted_model );
+        HostedModelHolder::setModel( $first );
+        HostedModelHolder::setXMLModel( $first->getXML() );
+        
+        Log::writeInfo( 'Build successfully hosted services model: ' . $this->hosted_collection );
         
     }
     

@@ -244,6 +244,17 @@ class ClassManager
         
     }
     
+    public static function getAsJSON() {
+        
+        // TODO
+    }
+    
+    public static function initFromJSON() {
+        
+        // TODO
+    }
+
+
     public static function debug(){  var_dump( self::$classes_holder ); }
     
 }   

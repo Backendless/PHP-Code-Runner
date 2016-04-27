@@ -83,10 +83,9 @@ class DefaultTypeParser extends TypeParser {
             
             $property_info = [];
             
-            $property_info['name'] = $prop->getName();
-            $property_info['type'] = $this->getTypeByVarName( $prop->getName() );
-            $this->addTypeToUsedList( $property_info['type'] );
-            
+            $property_info[ 'name' ] = $prop->getName();
+            $property_info[ 'type' ] = $this->getTypeByVarName( $prop->getName() );
+            $this->addTypeToUsedList( $property_info[ 'type' ] );
             $prop_types[] = $property_info;
             
         }

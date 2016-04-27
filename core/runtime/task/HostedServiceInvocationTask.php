@@ -25,17 +25,17 @@ class HostedServiceInvocationTask extends Runnable
     public function __construct( $rsi ) {
 
         $this->rsi = $rsi;
-        $this->sdk_loader = DS . "backendless" . DS . "autoload.php";
+        $this->sdk_loader = DS . 'backendless' . DS . 'autoload.php';
         
     }
 
     public function runImpl() {
         
-        Log::writeInfo("Called invocation task: " . $this->rsi, $target = 'file' );
+        Log::writeInfo( 'Called invocation task: ' . $this->rsi, $target = 'file' );
 
         if( $this->rsi == null ) {
             
-            Log::writeInfo("Something is null in InvocationActionTask...");
+            Log::writeInfo( 'Something is null in InvocationActionTask...' );
             return;
             
         }
@@ -113,9 +113,9 @@ class HostedServiceInvocationTask extends Runnable
             
             foreach ( $configuration_items as $conf_key => $conf_item ) {
             
-                if( $conf_item['name'] == $prop->getName() ) {
+                if( $conf_item[ 'name' ] == $prop->getName() ) {
                     
-                    $prop->setValue( $hosted_instance, $conf_item["value"] );
+                    $prop->setValue( $hosted_instance, $conf_item[ 'value' ] );
                 
                     unset( $configuration_items[ $conf_key ] );
                 
@@ -127,7 +127,7 @@ class HostedServiceInvocationTask extends Runnable
         // set undeclared properties
         foreach ( $configuration_items as $conf_key => $conf_item ) {
 
-            $hosted_instance->{$conf_item["name"]} = $conf_item["value"];
+            $hosted_instance->{$conf_item[ 'name' ]} = $conf_item[ 'value' ];
 
         }
         

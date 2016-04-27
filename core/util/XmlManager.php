@@ -64,33 +64,34 @@ class XmlManager
     private static $loaded_domtree = null;
     private static $xpath = null;
 
-    public function buildXml( $data_array, $runtime_vars ) {
+    public function buildXml( $datatypes, $service, $runtime_vars ) {
         
         $domtree = new DOMDocument('1.0', 'ISO-8859-1');
          
         $domtree->preserveWhiteSpace = false;
         $domtree->formatOutput = true;
 
-        $namespaces = $domtree->createElement("namespaces");
-        $root = $domtree->appendChild($namespaces);
+        $namespaces = $domtree->createElement( 'namespaces' );
+        $root = $domtree->appendChild( $namespaces );
 
-        $runtime = $domtree->createElement( "runtime" );
+        $runtime = $domtree->createElement( 'runtime' );
         $root->appendChild( $runtime );
 
         $this->fillAttributes( $runtime, $this->runtime_tag_attributes, $runtime_vars, false );
         
-        if( isset($data_array["datatype"]) ) {
+        if( count( $datatypes ) > 0 ) {
 
-            foreach ( $data_array["datatype"] as $class_info ) {
+            foreach ( $datatypes as $class_info ) {
 
-                $this->addNodeByNamespace( $this->builDatatypeNode( $class_info, $domtree ), $domtree, $root,  $class_info['namespace'] );
+                $this->addNodeByNamespace( $this->builDatatypeNode( $class_info, $domtree ), $domtree, $root,  $class_info[ 'namespace' ] );
 
             }
 
-            $this->addNodeByNamespace(  $this->builServiseNode( $data_array['service']['class_description'], $data_array['service']['methods'], $domtree ), 
+            $this->addNodeByNamespace(  
+                                        $this->builServiseNode( $service[ 'class_description' ], $service[ 'methods' ], $domtree ), 
                                         $domtree, 
                                         $root,  
-                                        $data_array['service']['class_description']['namespace'] 
+                                        $service[ 'class_description' ][ 'namespace' ] 
                                      );
         }
         

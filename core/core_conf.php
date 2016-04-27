@@ -15,6 +15,7 @@
                 'delete_hosted_model_link'  =>      '/servercode/services/debug',
                 'hosted_publish_code'       =>      '/servercode/services',
     
+                'hosted_model'              =>      'com.backendless.coderunner.commons.model.ServiceModel',
     
     
                 // interface class name for hosted service

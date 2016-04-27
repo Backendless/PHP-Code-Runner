@@ -1,11 +1,10 @@
 <?php
 namespace backendless\core\commons\model;
 
-use backendless\core\Config;
 use ReflectionClass;
-use backendless\core\util\XmlManager;
 
-class HostedModel
+
+class DebuggableHostedModel
 {
     private $application_id;
     private $app_version_id;
@@ -15,15 +14,16 @@ class HostedModel
     
     protected $id;
     protected $name;
+    protected $lang = 'PHP';
     protected $description;
     protected $update_notes;
     protected $version;
     protected $is_in_debug;
     protected $internal_only;
     protected $free_access_to_api;
-    protected $deployment_scope = "LOCAL";
+    protected $deployment_scope = 'LOCAL';
     protected $configuration;
-    private   $xml_description;
+    protected $xml_description;
     
     public function __construct() {
         
@@ -38,6 +38,8 @@ class HostedModel
     public function setApplicationId( $application_id ) {
         
         $this->application_id = $application_id;
+        $this->id = $application_id;
+        return $this;
         
     }
 
@@ -53,44 +55,30 @@ class HostedModel
         
     }
     
-    public function setData( $parsed_data ) {
+    public function setData( $service, $datatypes ) {
         
-        $this->service = $parsed_data[ "service" ];
-        $this->datatype = $parsed_data[ "datatype" ];
-        $this->xml_description = $this->generateXML();
+        $this->service = $service;
+        $this->datatype = $datatypes;
+        return $this;
     
     }
     
     public function getCountOfEvents() {
         
-        return count( $this->service["methods"] );
+        return count( $this->service[ 'methods' ] );
+        
+    }
+    
+    public function setXML( $xml ) {
+        
+        $this->xml_description = $xml;
+        return $this;
         
     }
     
     public function getXml(){
         
         return $this->xml_description;
-        
-    }
-    
-    protected function generateXML() {
-        
-        $runtime = [
-
-                        //'path'           => $path_to_hosted,
-                        'endpointURL'    => Config::$CORE['hosted_service']['endpoint_url'],
-                        'serverRootURL'  => Config::$CORE['hosted_service']['server_root_url'],
-                        'serverPort'     => Config::$CORE['hosted_service']['server_port'],
-                        'serverName'     => Config::$CORE['hosted_service']['server_name'],
-                        'codeFormatType' => Config::$CORE['hosted_service']['code_format_type'], 
-                        "generationMode" => Config::$CORE['hosted_service']['generation_mode'], 
-                        'randomUUID'     => mt_rand( 100000000, PHP_INT_MAX ),
-
-                   ];
-            
-        $xml_manager = new XmlManager();
-        
-        return $xml_manager->buildXml( [ "service" => $this->service, "datatype"  => $this->datatype ], $runtime );
         
     }
     
@@ -101,6 +89,12 @@ class HostedModel
     }
     
     public function getJson() {
+        
+        return json_encode( $this->getAsArray() );        
+        
+    }
+    
+    public function getAsArray() {
         
         $keys_ratio = [
                             "update_notes"          =>  "updateNotes",
@@ -150,8 +144,36 @@ class HostedModel
             $data_array[ $json_key ] =  $prop->getValue( $this );
             
         }
-                    
-        return json_encode( $data_array );        
+        
+        return $data_array;
+        
+    }
+    
+    public function setName( $name ) {
+        
+        $this->name = $name;
+        return $this;
+        
+    }
+    
+    public function setVersion( $version ) {
+        
+        $this->version = $version;
+        return $this;
+        
+    }
+    
+    public function setDescription( $description ) {
+        
+        $this->description = $description;
+        return $this;
+        
+    }
+    
+    public function setConfig( $config ) {
+        
+        $this->configuration = $config;
+        return $this;
         
     }
           

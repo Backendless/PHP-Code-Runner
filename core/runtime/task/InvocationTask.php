@@ -152,7 +152,6 @@ class InvocationTask extends Runnable
             Log::writeError( $e->getMessage() );
             
             $this->handleException( $e, $invocation_result );
-            
                         
         }        
     

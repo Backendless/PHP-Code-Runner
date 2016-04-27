@@ -36,8 +36,6 @@ abstract class TypeParser {
     
     protected function getTypeByVarName( $name ) {
         
-        //var_dump($this->parsed_types[ $name ]);
-    
         if( isset( $this->parsed_types[ $name ] ) ) {
             
             return $this->parsed_types[ $name ];

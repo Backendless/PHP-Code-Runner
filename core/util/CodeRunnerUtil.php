@@ -134,7 +134,7 @@ class CodeRunnerUtil
                      ->setHeader(self::$VERSION, Config::$APP_VERSION)
                      ->setHeader('Content-type', 'application/json')
                      ->request( $model->getJson() );
-         
+        
         if( $http_request->getResponseCode() != 200 ) {
 
             $msg = "Model deploying failed, HTTP response code: " . $http_request->getResponseCode() . " response status: " . $http_request->getResponseStatus();  

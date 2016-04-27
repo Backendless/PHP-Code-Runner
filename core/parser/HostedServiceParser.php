@@ -4,8 +4,10 @@ namespace backendless\core\parser;
 use backendless\core\util\HostedReflectionUtil;
 use backendless\core\Config;
 use backendless\core\lib\Log;
-use Exception;
-use backendless\core\commons\model\HostedModel;
+use backendless\core\commons\exception\CodeRunnerException;
+use backendless\core\commons\model\HostedCollection;
+use backendless\core\commons\model\DebuggableHostedModel;
+use backendless\core\util\PathBuilder;
 
 
 class HostedServiceParser {
@@ -30,55 +32,57 @@ class HostedServiceParser {
 
     public function parseDebugModel() {        
         
-        Log::writeInfo("Parsing hosted user code..."); 
+        Log::writeInfo( 'Parsing hosted user code...' ); 
 
-        if( ! file_exists(  realpath( getcwd() . DS . Config::$CLASS_LOCATION) ) ) {
+        if( ! file_exists( PathBuilder::getDebugClasses()  )  ) {
             
-          $msg ="Seems, that the class location is wrong. Please, check it and run CodeRunner again.";
+          $msg = 'Seems, that the class location is wrong. Please, check it and run CodeRunner again.';
           Log::writeError( $msg ,$target = "console" );
           throw new CodeRunnerException( $msg );
           
         }
 
-        $hosted_model = new HostedModel();
-        
-        $hosted_model->setApplicationId( Config::$APPLICATION_ID );
-        $hosted_model->setAppVersionId( Config::$APP_VERSION );
+//        $debug_hosted_model = new DebuggableHostedModel();
+//        
+//        $debug_hosted_model->setApplicationId( Config::$APPLICATION_ID );
+//        $debug_hosted_model->setAppVersionId( Config::$APP_VERSION );
             
-        $hosted_parser = new HostedReflectionUtil( realpath( getcwd() . DS . Config::$CLASS_LOCATION) );
+        $reflection_util = new HostedReflectionUtil( PathBuilder::getDebugClasses() );
             
-        $hosted_parser->parseFolderWithCustomCode(); 
+        $reflection_util->parseFolderWithCustomCode(); 
             
-        if( $hosted_parser->isError() ) {
+        if( $reflection_util->isError() ) {
                 
-            Log::writeError( $hosted_parser->getError()['msg'] );
-            throw new Exception( $hosted_parser->getError()['msg'] );
+            Log::writeError( $hosted_parser->getError()[ 'msg' ] );
+            throw new CodeRunnerException( $hosted_parser->getError()[ 'msg' ] );
             
         }
         
-        $hosted_model->setData( $hosted_parser->getParsedData() );
+        $hosted_collection = new HostedCollection();
+        $hosted_collection->putModels( $reflection_util->getDebugModels() );
         
-        return $hosted_model;
+        return $hosted_collection;
        
     }
     
     public function parseModelRAI( $repo_path ) {
         
-        Log::writeInfo("RAI parsing hosted user code."); 
+        Log::writeInfo( 'RAI parsing hosted user code.' ); 
 
-        if( ! file_exists(  $repo_path) ) {
+        if( ! file_exists(  $repo_path ) ) {
             
-          $msg ="Seems, that the class location is wrong. Please, check it and run CodeRunner again.";
-          Log::writeError( $msg ,$target = "console" );
+          $msg = 'Seems, that the class location is wrong. Please, check it and run CodeRunner again.';
+          
+          Log::writeError( $msg, $target = 'console' );
           throw new CodeRunnerException( $msg );
           
         }
             
-        $parser = new HostedReflectionUtil( $repo_path );
+        $reflection_util = new HostedReflectionUtil( $repo_path );
             
-        $parser->parseFolderWithCustomCode(); 
+        $reflection_util->parseFolderWithCustomCode(); 
             
-        return $parser;
+        return $reflection_util;
         
     }
    
